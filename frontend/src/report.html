@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Report Issue | Decentralized Tamper-Resistant Civic Issue Reporting System</title>
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Decentralized Tamper-Resistant Civic Issue Reporting System</h1>
+
+      <section class="card">
+        <div class="top-actions">
+          <h2>Report an Issue</h2>
+          <a class="action-link" href="/">Back to Dashboard</a>
+        </div>
+
+        <form id="issue-form" class="grid" enctype="multipart/form-data">
+          <label class="field">
+            <span>Title *</span>
+            <input type="text" name="title" minlength="5" required />
+          </label>
+
+          <label class="field">
+            <span>Category *</span>
+            <input type="text" name="category" placeholder="Road, Water, Garbage..." required />
+          </label>
+
+          <label class="field full">
+            <span>Description *</span>
+            <textarea name="description" minlength="10" required></textarea>
+          </label>
+
+          <div class="field full">
+            <button type="button" id="location-btn" class="location-btn">Get Current Location</button>
+            <p id="location-status"></p>
+            <input type="hidden" name="latitude" id="latitude-input" required />
+            <input type="hidden" name="longitude" id="longitude-input" required />
+          </div>
+
+          <label class="field">
+            <span>Area *</span>
+            <input type="text" name="area" required />
+          </label>
+
+          <label class="field">
+            <span>Address</span>
+            <input type="text" name="address" />
+          </label>
+
+          <label class="field">
+            <span>Reporter Name *</span>
+            <input type="text" name="reporter_name" required />
+          </label>
+
+          <label class="field">
+            <span>Contact</span>
+            <input type="text" name="contact" />
+          </label>
+
+          <label class="field full">
+            <span>Image</span>
+            <input type="file" name="image" accept="image/*" />
+          </label>
+
+          <div class="field full">
+            <button id="submit-btn" type="submit">Submit Issue</button>
+            <p id="message"></p>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="/assets/report.js"></script>
+  </body>
+</html>

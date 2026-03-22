@@ -1,0 +1,33 @@
+Project Proposal Summary: Decentralized Tamper-Resistant Civic Issue Reporting System
+
+Overview
+- A civic web platform for citizens to report local issues and for authorities to track and resolve them.
+- Core value: transparent complaint lifecycle management with geotagged evidence and community prioritization.
+
+Primary Capabilities
+- User registration/login with role-based access (citizen, authority).
+- Complaint submission with title, description, category, area, geolocation, and optional image.
+- Complaint browsing with filtering (status, area, category) and prioritization by upvotes.
+- Authority workflows for status updates (pending, in_progress, resolved, rejected), comments, and proof uploads.
+- User profile and user-specific complaint history.
+- Area-wise complaint statistics for authority dashboards.
+
+Data & Security Design
+- PostgreSQL (Neon) schema centered on users, complaints, upvotes, status history, and blockchain hash records.
+- JWT authentication, password hashing (bcrypt/passlib), role checks, and input validation.
+- Uploaded media served from an uploads directory.
+
+Architecture Snapshot
+- Repository previously contained two backend implementations with similar domain behavior:
+  1) Python/FastAPI stack (documented as primary setup path).
+  2) Node.js/Express stack (parallel implementation).
+- Static frontend pages were served from a public directory and consumed REST APIs.
+
+Decentralization / Tamper-Resistance Status
+- Blockchain integration was in placeholder mode.
+- Complaint data hashing existed, but on-chain storage and verification were not fully implemented.
+
+Expected Outcome (When Fully Realized)
+- Faster and more accountable local issue resolution.
+- Higher public trust via auditability and immutable integrity proofs.
+- Clear citizen-authority collaboration through transparent status tracking and prioritization.
