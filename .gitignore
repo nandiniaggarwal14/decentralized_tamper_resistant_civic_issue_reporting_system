@@ -9,6 +9,10 @@ __pycache__/
 .venv/
 venv/
 
+# Node dependencies
+node_modules/
+smart_contract/node_modules/
+
 # Environment variables / secrets
 .env
 

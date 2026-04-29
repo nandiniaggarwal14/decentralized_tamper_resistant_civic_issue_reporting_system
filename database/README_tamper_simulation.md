@@ -1,0 +1,3 @@
+psql "$env:DATABASE_URL" -c "UPDATE issues SET latitude = 12.9716 WHERE id = 'b33fc1c5-58fb-4038-9a15-c90669383de0';"
+
+30.268683999999997

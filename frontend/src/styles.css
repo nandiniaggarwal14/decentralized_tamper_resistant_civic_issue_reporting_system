@@ -182,10 +182,63 @@ button:disabled {
 
 .issue-actions {
   margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .details-btn {
   background: #1d4ed8;
+}
+
+.verify-btn {
+  background: #374151;
+}
+
+.verification-status {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.verification-status.verified {
+  color: #047857;
+}
+
+.verification-status.tampered {
+  color: #b91c1c;
+}
+
+.verification-status.error {
+  color: #92400e;
+}
+
+.verify-all-wrap {
+  margin-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 12px;
+}
+
+.verify-all-btn {
+  background: #0f766e;
+}
+
+.verify-all-result {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.verify-all-result.ok {
+  color: #047857;
+}
+
+.verify-all-result.warn {
+  color: #92400e;
+}
+
+.verify-all-result.error {
+  color: #b91c1c;
 }
 
 .issue-details {

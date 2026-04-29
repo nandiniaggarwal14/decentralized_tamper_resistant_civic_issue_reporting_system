@@ -1,0 +1,41 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "D:\\Decentralized_Tamper_Resistent_Civic_Issue_Reporting_System\\smart_contract\\contracts\\Verification.sol": {
+      "lastModificationDate": 1777257989489,
+      "contentHash": "e3d877eac961edbcf848002b98279d75",
+      "sourceName": "contracts/Verification.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Verification"
+      ]
+    }
+  }
+}

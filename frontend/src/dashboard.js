@@ -1,5 +1,7 @@
 const listEl = document.getElementById('issue-list');
 const messageEl = document.getElementById('message');
+const verifyAllBtn = document.getElementById('verify-all-btn');
+const verifyAllResultEl = document.getElementById('verify-all-result');
 const voterId = getOrCreateVoterId();
 const votingInProgress = new Set();
 const issuesById = new Map();
@@ -170,6 +172,8 @@ function renderIssues(issues) {
           </div>
           <div class="issue-actions">
             <button class="details-btn" data-issue-id="${escapeHtml(issue.id)}" data-expanded="false">View Details</button>
+            <button class="verify-btn" data-role="verify-btn" data-issue-id="${escapeHtml(issue.id)}">Verify</button>
+            <span class="verification-status" data-role="verification-status"></span>
           </div>
           <div id="details-${escapeHtml(issue.id)}" class="issue-details" hidden>
             <p>${escapeHtml(issue.description)}</p>
@@ -252,6 +256,78 @@ async function voteOnIssue(issueId, voteType) {
   }
 }
 
+async function verifyIssue(issueId) {
+  const card = listEl.querySelector(`[data-issue-id="${CSS.escape(issueId)}"]`);
+  if (!card) {
+    return;
+  }
+
+  const statusEl = card.querySelector('[data-role="verification-status"]');
+  if (!statusEl) {
+    return;
+  }
+
+  statusEl.textContent = 'Verifying...';
+  statusEl.classList.remove('verified', 'tampered', 'error');
+
+  try {
+    const response = await fetch(`/api/verify/${encodeURIComponent(issueId)}`);
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.detail || 'Verification failed');
+    }
+
+    if (result.verified) {
+      statusEl.textContent = 'Verified';
+      statusEl.classList.add('verified');
+    } else {
+      statusEl.textContent = 'Tampered';
+      statusEl.classList.add('tampered');
+    }
+  } catch (error) {
+    statusEl.textContent = `Error: ${error.message}`;
+    statusEl.classList.add('error');
+  }
+}
+
+async function verifyAllIssues() {
+  if (!verifyAllBtn || !verifyAllResultEl) {
+    return;
+  }
+
+  verifyAllBtn.disabled = true;
+  verifyAllResultEl.textContent = 'Verifying all rows...';
+  verifyAllResultEl.classList.remove('ok', 'warn', 'error');
+
+  try {
+    const response = await fetch('/api/verify-all');
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.detail || 'Verify all failed');
+    }
+
+    const missingRows = Array.isArray(result.missing_rows) ? result.missing_rows : [];
+    const missingText = missingRows.length
+      ? ` Missing: ${missingRows.map((item) => item.issue_id).join(', ')}`
+      : '';
+
+    verifyAllResultEl.textContent =
+      `Total: ${result.total}, Verified: ${result.verified_count}, Mismatch: ${result.tampered_or_mismatch_count}, Missing Rows: ${result.missing_rows_count}.` +
+      missingText;
+
+    if (result.missing_rows_count > 0 || result.tampered_or_mismatch_count > 0) {
+      verifyAllResultEl.classList.add('warn');
+    } else {
+      verifyAllResultEl.classList.add('ok');
+    }
+  } catch (error) {
+    verifyAllResultEl.textContent = `Error: ${error.message}`;
+    verifyAllResultEl.classList.add('error');
+  } finally {
+    verifyAllBtn.disabled = false;
+  }
+}
+
 listEl.addEventListener('click', async (event) => {
   const voteButton = event.target.closest('.vote-btn');
   if (voteButton) {
@@ -275,7 +351,20 @@ listEl.addEventListener('click', async (event) => {
     details.hidden = expanded;
     detailsButton.setAttribute('data-expanded', String(!expanded));
     detailsButton.textContent = expanded ? 'View Details' : 'Hide Details';
+    return;
+  }
+
+  const verifyButton = event.target.closest('[data-role="verify-btn"]');
+  if (verifyButton) {
+    const issueId = verifyButton.getAttribute('data-issue-id');
+    if (issueId) {
+      await verifyIssue(issueId);
+    }
   }
 });
+
+if (verifyAllBtn) {
+  verifyAllBtn.addEventListener('click', verifyAllIssues);
+}
 
 loadIssues();

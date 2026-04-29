@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS issues (
     reporter_name VARCHAR(255) NOT NULL,
     contact VARCHAR(255),
     image_url TEXT,
+    hash TEXT,
     status VARCHAR(50) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'resolved', 'rejected')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -25,7 +26,8 @@ CREATE TABLE IF NOT EXISTS issue_votes (
 
 ALTER TABLE issues
     ADD COLUMN IF NOT EXISTS upvote_count INTEGER NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS downvote_count INTEGER NOT NULL DEFAULT 0;
+    ADD COLUMN IF NOT EXISTS downvote_count INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS hash TEXT;
 
 UPDATE issues AS i
 SET
