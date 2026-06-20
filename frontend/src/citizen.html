@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="public_feed">Public Civic Feed — Citizen Dashboard</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">🏛</div>
+        <div class="brand-text">
+          <h1 data-i18n="title">Decentralized Portal</h1>
+          <p data-i18n="subtitle">Citizen Console</p>
+        </div>
+      </div>
+
+      <!-- Profile Card -->
+      <div class="sidebar-profile">
+        <div class="profile-avatar" id="profile-initials">C</div>
+        <div class="profile-info">
+          <div class="name" id="profile-name">Citizen User</div>
+          <div class="role" id="profile-role" data-i18n="citizen">Citizen</div>
+        </div>
+      </div>
+
+      <!-- Navigation links -->
+      <nav class="sidebar-nav">
+        <a class="nav-link active" href="/citizen.html">
+          <span>📋</span> <span data-i18n="public_feed">Public Feed</span>
+        </a>
+        <a class="nav-link" href="/report.html">
+          <span>✍</span> <span data-i18n="report_complaint">Report Issue</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <select id="lang-select" class="lang-selector" style="width: 100%; margin-bottom: 16px;">
+          <option value="en">English (EN)</option>
+          <option value="hi">हिंदी (HI)</option>
+        </select>
+        <button onclick="auth.logout()" class="btn btn-danger" style="width: 100%;" data-i18n="signout">Logout</button>
+      </div>
+    </aside>
+
+    <!-- RIGHT CONTENT AREA -->
+    <main style="padding: 40px; overflow-y: auto; height: 100vh; width: 100%;">
+      <div style="max-width: 800px; margin: 0 auto;">
+        
+        <!-- Welcome Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+          <div>
+            <h2 data-i18n="public_feed">Public Civic Feed</h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Browse, vote, and verify real-time local reports on-chain</p>
+          </div>
+          <button onclick="loadIssues()" class="btn btn-secondary" style="padding: 8px 16px;" data-i18n="refresh">Refresh</button>
+        </div>
+
+        <!-- Notification Banner -->
+        <div id="alert-banner" class="alert-banner alert-success" style="display: none;">
+          <span id="alert-text">Status update message</span>
+        </div>
+
+        <!-- List of Issues -->
+        <div id="feed-container" class="feed-grid">
+          <p style="text-align: center; color: var(--text-secondary); padding: 40px;" data-i18n="loading_reports">Loading civic reports...</p>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/assets/i18n.js"></script>
+  <script src="/assets/auth.js"></script>
+  <script src="/assets/citizen.js"></script>
+</body>
+</html>

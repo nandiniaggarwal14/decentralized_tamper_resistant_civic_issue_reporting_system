@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="admin_dashboard">Admin Console — Decentralized Civic Portal</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <style>
+    /* ===== Tab Navigation ===== */
+    .tab-nav {
+      display: flex;
+      gap: 4px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 28px;
+      padding-bottom: 0;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-radius: 6px 6px 0 0;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { color: var(--primary); background: var(--surface-alt); }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--surface-alt); }
+
+    /* ===== Tab Panels ===== */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ===== Management Cards / Forms ===== */
+    .mgmt-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
+    @media(max-width:800px) { .mgmt-row { grid-template-columns: 1fr; } }
+
+    .mgmt-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .mgmt-card h4 {
+      margin: 0 0 16px;
+      font-size: 1rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mgmt-card .form-group { margin-bottom: 12px; }
+    .mgmt-card label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+    .mgmt-card input, .mgmt-card select, .mgmt-card textarea {
+      width: 100%; padding: 8px 12px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--text-primary); font-size: 0.88rem; box-sizing: border-box;
+    }
+    .mgmt-card textarea { min-height: 60px; resize: vertical; }
+
+    /* ===== Management Table Badges ===== */
+    .role-badge {
+      display: inline-block; padding: 2px 10px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 700; text-transform: capitalize;
+    }
+    .role-badge.admin     { background: #7c3aed22; color: #7c3aed; }
+    .role-badge.citizen   { background: #0ea5e922; color: #0ea5e9; }
+    .role-badge.authority { background: #f59e0b22; color: #f59e0b; }
+    .role-badge.ward_member { background: #22c55e22; color: #22c55e; }
+
+    /* ===== Icon buttons ===== */
+    .btn-icon {
+      background: none; border: 1px solid var(--border);
+      border-radius: 6px; cursor: pointer; padding: 4px 8px;
+      font-size: 0.8rem; transition: all 0.2s; color: var(--text-secondary);
+    }
+    .btn-icon:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-icon.danger:hover { border-color: var(--danger); color: var(--danger); }
+  </style>
+</head>
+<body>
+  <div class="dashboard-layout">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">🏛</div>
+        <div class="brand-text">
+          <h1 data-i18n="title">Decentralized Portal</h1>
+          <p data-i18n="subtitle">Admin Console</p>
+        </div>
+      </div>
+
+      <!-- Profile Card -->
+      <div class="sidebar-profile">
+        <div class="profile-avatar" id="profile-initials">AD</div>
+        <div class="profile-info">
+          <div class="name" id="profile-name">System Administrator</div>
+          <div class="role" id="profile-role">Admin</div>
+        </div>
+      </div>
+
+      <!-- Navigation links -->
+      <nav class="sidebar-nav">
+        <a class="nav-link active" href="/admin.html">
+          <span>📋</span> <span data-i18n="admin_dashboard">Admin Dashboard</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <select id="lang-select" class="lang-selector" style="width: 100%; margin-bottom: 16px;">
+          <option value="en">English (EN)</option>
+          <option value="hi">हिंदी (HI)</option>
+        </select>
+        <button onclick="auth.logout()" class="btn btn-danger" style="width: 100%;" data-i18n="signout">Logout</button>
+      </div>
+    </aside>
+
+    <!-- RIGHT CONTENT AREA -->
+    <main style="padding: 40px; overflow-y: auto; height: 100vh; width: 100%;">
+      <div style="max-width: 1100px; margin: 0 auto;">
+
+        <!-- Welcome Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <div>
+            <h2 data-i18n="admin_dashboard">Admin Dashboard</h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Manage wards, departments, users, and system integrity</p>
+          </div>
+          <button onclick="refreshDashboard()" class="btn btn-secondary" style="padding: 8px 16px;" data-i18n="refresh">Refresh</button>
+        </div>
+
+        <!-- Notification Banner -->
+        <div id="alert-banner" class="alert-banner alert-success" style="display: none;">
+          <span id="alert-text">System alert message</span>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+                    <button class="tab-btn active" onclick="switchTab('tab-overview')" id="tab-btn-overview">📊 Overview</button>
+          <button class="tab-btn" onclick="switchTab('tab-wards')" id="tab-btn-wards">🗺️ Wards</button>
+          <button class="tab-btn" onclick="switchTab('tab-departments')" id="tab-btn-departments">🏢 Departments</button>
+          <button class="tab-btn" onclick="switchTab('tab-users')" id="tab-btn-users">👥 All Users</button>
+          <button class="tab-btn" onclick="switchTab('tab-approvals')" id="tab-btn-approvals">✅ Approvals</button>
+          <button class="tab-btn" onclick="switchTab('tab-blockchain')" id="tab-btn-blockchain">⛓️ Blockchain</button>
+        </div>
+
+        <!-- ==================== TAB: OVERVIEW ==================== -->
+        <div class="tab-panel active" id="tab-overview">
+          <h3 style="margin-bottom: 16px;" data-i18n="system_stats">System Statistics</h3>
+          <div class="admin-grid" id="stats-grid">
+            <div class="admin-card">
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">Total Registered Users</p>
+              <h2 style="font-size: 2rem; margin-top: 8px;" id="stat-total-users">-</h2>
+            </div>
+            <div class="admin-card">
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">Total Issues Logged</p>
+              <h2 style="font-size: 2rem; margin-top: 8px;" id="stat-total-issues">-</h2>
+            </div>
+            <div class="admin-card">
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">Pending User Approvals</p>
+              <h2 style="font-size: 2rem; margin-top: 8px; color: var(--warning);" id="stat-pending-approvals">-</h2>
+            </div>
+            <div class="admin-card">
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">Resolved Civic Issues</p>
+              <h2 style="font-size: 2rem; margin-top: 8px; color: var(--success);" id="stat-resolved-issues">-</h2>
+            </div>
+            <div class="admin-card">
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">Failed On-Chain Transactions</p>
+              <h2 style="font-size: 2rem; margin-top: 8px; color: var(--danger);" id="stat-failed-txns">-</h2>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== TAB: WARDS ==================== -->
+        <div class="tab-panel" id="tab-wards">
+          <div class="mgmt-row">
+            <!-- Create Ward form -->
+            <div class="mgmt-card">
+              <h4>➕ Create New Ward</h4>
+              <div class="form-group">
+                <label>Ward Name</label>
+                <input type="text" id="ward-name" placeholder="e.g. Ward 1 – Connaught Place">
+              </div>
+              <div class="form-group">
+                <label>Center Latitude</label>
+                <input type="number" step="any" id="ward-lat" placeholder="e.g. 28.6332">
+              </div>
+              <div class="form-group">
+                <label>Center Longitude</label>
+                <input type="number" step="any" id="ward-lng" placeholder="e.g. 77.2194">
+              </div>
+              <div class="form-group">
+                <label>Radius (metres)</label>
+                <input type="number" id="ward-radius" value="5000">
+              </div>
+              <button class="btn btn-primary" style="width:100%; margin-top:4px;" onclick="createWard()">Create Ward</button>
+            </div>
+
+            <!-- Assign Ward Member form -->
+            <div class="mgmt-card">
+              <h4>👤 Assign Member to Ward</h4>
+              <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:12px;">Only users with the <strong>ward_member</strong> role can be assigned.</p>
+              <div class="form-group">
+                <label>Select Ward</label>
+                <select id="assign-ward-select"><option value="">— select ward —</option></select>
+              </div>
+              <div class="form-group">
+                <label>Select Ward-Member User</label>
+                <select id="assign-ward-user-select"><option value="">— select user —</option></select>
+              </div>
+              <button class="btn btn-primary" style="width:100%; margin-top:4px;" onclick="assignWardMember()">Assign Member</button>
+              <button class="btn btn-secondary" style="width:100%; margin-top:8px;" onclick="unassignWardMember()">Remove Current Member</button>
+            </div>
+          </div>
+
+          <!-- Wards List -->
+          <h4 style="margin-bottom:12px;">📋 All Wards</h4>
+          <div class="admin-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Ward Name</th><th>Centre (Lat, Lng)</th><th>Radius (m)</th><th>Assigned Member</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="wards-tbody">
+                <tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:32px;">Loading wards...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==================== TAB: DEPARTMENTS ==================== -->
+        <div class="tab-panel" id="tab-departments">
+          <div class="mgmt-row">
+            <!-- Create Department form -->
+            <div class="mgmt-card">
+              <h4>➕ Create New Department</h4>
+              <div class="form-group">
+                <label>Department Name</label>
+                <input type="text" id="dept-name" placeholder="e.g. Public Works Department">
+              </div>
+              <div class="form-group">
+                <label>Description (optional)</label>
+                <textarea id="dept-desc" placeholder="Brief description of this department's responsibilities"></textarea>
+              </div>
+              <button class="btn btn-primary" style="width:100%; margin-top:4px;" onclick="createDepartment()">Create Department</button>
+            </div>
+
+            <!-- Assign Authority form -->
+            <div class="mgmt-card">
+              <h4>🔑 Assign Authority to Department</h4>
+              <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:12px;">Only users with the <strong>authority</strong> role can be assigned.</p>
+              <div class="form-group">
+                <label>Select Department</label>
+                <select id="assign-dept-select"><option value="">— select department —</option></select>
+              </div>
+              <div class="form-group">
+                <label>Select Authority User</label>
+                <select id="assign-dept-user-select"><option value="">— select user —</option></select>
+              </div>
+              <div class="form-group">
+                <label>Designation</label>
+                <input type="text" id="assign-designation" value="Department Official" placeholder="e.g. Chief Engineer">
+              </div>
+              <button class="btn btn-primary" style="width:100%; margin-top:4px;" onclick="assignAuthorityToDept()">Assign Authority</button>
+            </div>
+          </div>
+
+          <!-- Departments List -->
+          <h4 style="margin-bottom:12px;">📋 All Departments</h4>
+          <div class="admin-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Department Name</th><th>Description</th><th>Assigned Authorities</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="departments-tbody">
+                <tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:32px;">Loading departments...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==================== TAB: ALL USERS ==================== -->
+        <div class="tab-panel" id="tab-users">
+          <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; align-items:center;">
+            <input type="text" id="user-search" placeholder="🔍 Search by name or username…"
+              style="padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-primary);flex:1;min-width:200px;"
+              oninput="filterUsers()">
+            <select id="user-role-filter" style="padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-primary);" onchange="filterUsers()">
+              <option value="">All Roles</option>
+              <option value="admin">Admin</option>
+              <option value="citizen">Citizen</option>
+              <option value="ward_member">Ward Member</option>
+              <option value="authority">Authority</option>
+            </select>
+          </div>
+          <div class="admin-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Username</th><th>Full Name</th><th>Role</th><th>Assigned To</th><th>Approved</th><th>Joined</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody">
+                <tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:32px;">Loading users...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==================== TAB: APPROVALS ==================== -->
+        <div class="tab-panel" id="tab-approvals">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 data-i18n="pending_approvals">Pending User Approvals</h3>
+          </div>
+          <div class="admin-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Full Name</th><th>Username</th><th>Role</th><th>Details</th><th>Status</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="approvals-tbody">
+                <tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:32px;">Loading approvals queue...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==================== TAB: BLOCKCHAIN ==================== -->
+        <div class="tab-panel" id="tab-blockchain">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 data-i18n="failed_transactions">Failed Blockchain Transactions</h3>
+            <button id="btn-retry-all" onclick="retryFailedTransactions()" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" data-i18n="retry_all">Retry All Transactions</button>
+          </div>
+          <div class="admin-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Function Call</th><th>Arguments</th><th>Retry Count</th><th>Last Error</th><th>Created At</th>
+                </tr>
+              </thead>
+              <tbody id="transactions-tbody">
+                <tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:32px;">Loading failed transactions...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/assets/i18n.js"></script>
+  <script src="/assets/auth.js"></script>
+  <script src="/assets/admin.js"></script>
+</body>
+</html>

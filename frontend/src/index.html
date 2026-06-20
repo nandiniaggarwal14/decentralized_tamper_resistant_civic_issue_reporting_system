@@ -1,33 +1,260 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Decentralized Tamper-Resistant Civic Issue Reporting System</title>
-    <link rel="stylesheet" href="/assets/styles.css" />
-  </head>
-  <body>
-    <main class="container">
-      <h1>Decentralized Tamper-Resistant Civic Issue Reporting System</h1>
-
-      <section class="card">
-        <div class="top-actions">
-          <h2>Dashboard</h2>
-          <a class="action-link" href="/report">Report an Issue</a>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="title">Decentralized Tamper-Resistant Civic Issue Reporting System</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div class="container" style="max-width: 1000px; padding-top: 40px;">
+    
+    <!-- Top Nav / Header Controls -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">🏛</div>
+        <div class="brand-text">
+          <h1 data-i18n="title">Decentralized Civic Portal</h1>
+          <p data-i18n="subtitle">Secured by Ethereum Sepolia & IPFS Integrity Ledger</p>
         </div>
-      </section>
+      </div>
+      <div class="header-controls">
+        <select id="lang-select" class="lang-selector">
+          <option value="en">English (EN)</option>
+          <option value="hi">हिंदी (HI)</option>
+        </select>
+      </div>
+    </header>
 
-      <section class="card">
-        <h2>Reported Issues</h2>
-        <p id="message"></p>
-        <div id="issue-list" class="issue-list"></div>
-        <div class="verify-all-wrap">
-          <button id="verify-all-btn" class="verify-all-btn">Verify All</button>
-          <div id="verify-all-result" class="verify-all-result"></div>
+    <!-- Main Entry Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; margin-top: 20px;">
+      
+      <!-- Left Info Side -->
+      <div>
+        <div class="card" style="margin-bottom: 24px;">
+          <h2 data-i18n="system_status" style="margin-bottom: 16px;">System Integrity Node</h2>
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+              <span data-i18n="database">Database Connection:</span>
+              <span id="status-db" data-i18n="checking" style="font-weight: bold; color: var(--warning);">Checking...</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+              <span data-i18n="ipfs">IPFS Cluster Storage:</span>
+              <span id="status-ipfs" data-i18n="active" style="font-weight: bold; color: var(--success);">Active</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding-bottom: 4px;">
+              <span data-i18n="blockchain">Ethereum Sepolia Hash:</span>
+              <span id="status-blockchain" data-i18n="checking" style="font-weight: bold; color: var(--warning);">Checking...</span>
+            </div>
+          </div>
         </div>
-      </section>
-    </main>
 
-    <script src="/assets/dashboard.js"></script>
-  </body>
+        <div class="card">
+          <h2 data-i18n="gps_guide" style="margin-bottom: 12px;">Delhi Ward GPS Coordinates</h2>
+          <p data-i18n="gps_guide_sub" style="font-size: 0.85rem; margin-bottom: 16px;">Use these locations in reports to test automatic ward routing:</p>
+          <div class="gps-helper-grid">
+            <button class="gps-helper-btn" onclick="copyGPS(28.6315, 77.2167, 'Connaught Place (Ward 1)')">
+              <strong>Ward 1 (CP)</strong><br>28.6315, 77.2167
+            </button>
+            <button class="gps-helper-btn" onclick="copyGPS(28.6519, 77.1905, 'Karol Bagh (Ward 3)')">
+              <strong>Ward 3 (Karol Bagh)</strong><br>28.6519, 77.1905
+            </button>
+            <button class="gps-helper-btn" onclick="copyGPS(28.5244, 77.2066, 'Saket (Ward 4)')">
+              <strong>Ward 4 (Saket)</strong><br>28.5244, 77.2066
+            </button>
+            <button class="gps-helper-btn" onclick="copyGPS(28.5921, 77.0460, 'Dwarka (Ward 5)')">
+              <strong>Ward 5 (Dwarka)</strong><br>28.5921, 77.0460
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Login/Register Card -->
+      <div>
+        <div class="card" style="padding: 32px;">
+          <div class="auth-tabs">
+            <div id="tab-login" class="auth-tab active" onclick="switchAuthTab('login')" data-i18n="login">Login</div>
+            <div id="tab-register" class="auth-tab" onclick="switchAuthTab('register')" data-i18n="register">Register</div>
+          </div>
+
+          <!-- Alert notification banner -->
+          <div id="alert-banner" class="alert-banner alert-error" style="display: none;">
+            <span id="alert-text">Error message here</span>
+          </div>
+
+          <!-- Login Form -->
+          <form id="form-login" onsubmit="submitLogin(event)">
+            <div class="form-group">
+              <label for="login-username" data-i18n="username">Username</label>
+              <input type="text" id="login-username" required>
+            </div>
+            <div class="form-group">
+              <label for="login-password" data-i18n="password">Password</label>
+              <input type="password" id="login-password" required>
+            </div>
+            <button type="submit" class="btn" style="width: 100%; margin-top: 10px;" data-i18n="signin">Sign In</button>
+          </form>
+
+          <!-- Register Form -->
+          <form id="form-register" onsubmit="submitRegister(event)" style="display: none;">
+            <div class="form-group">
+              <label for="reg-username" data-i18n="username">Username</label>
+              <input type="text" id="reg-username" required>
+            </div>
+            <div class="form-group">
+              <label for="reg-password" data-i18n="password">Password</label>
+              <input type="password" id="reg-password" required placeholder="Min 6 characters">
+            </div>
+            <div class="form-group">
+              <label for="reg-fullname" data-i18n="fullname">Full Name</label>
+              <input type="text" id="reg-fullname" required>
+            </div>
+            <div class="form-group">
+              <label for="reg-contact" data-i18n="contact">Contact Info</label>
+              <input type="text" id="reg-contact">
+            </div>
+            <div class="form-group">
+              <label for="reg-role" data-i18n="role">Account Role</label>
+              <select id="reg-role" onchange="toggleRegFields()" required>
+                <option value="citizen" data-i18n="citizen">Citizen (General User)</option>
+                <option value="ward_member" data-i18n="ward_member">Ward Member (Local Representative)</option>
+                <option value="authority" data-i18n="authority">Government Department Authority</option>
+              </select>
+              <p id="reg-role-warning" style="font-size: 0.75rem; color: var(--warning); margin-top: 8px; display: none;">⚠ Requires administrator approval before dashboard access is granted.</p>
+            </div>
+
+            <!-- Dynamic Subfields -->
+            <div class="form-group" id="reg-ward-group" style="display: none;">
+              <label for="reg-ward" data-i18n="assigned_ward">Select Assigned Ward</label>
+              <select id="reg-ward">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="form-group" id="reg-dept-group" style="display: none;">
+              <label for="reg-dept" data-i18n="select_department">Select Department</label>
+              <select id="reg-dept">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-secondary" style="width: 100%; margin-top: 10px;" data-i18n="create_account">Create Account</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/assets/i18n.js"></script>
+  <script src="/assets/auth.js"></script>
+  <script>
+    // Tab Switching
+    let currentTab = 'login';
+    
+    function switchAuthTab(tab) {
+      currentTab = tab;
+      document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+      document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+      document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+      hideAlert();
+    }
+
+    function toggleRegFields() {
+      const role = document.getElementById('reg-role').value;
+      document.getElementById('reg-ward-group').style.display = role === 'ward_member' ? 'block' : 'none';
+      document.getElementById('reg-dept-group').style.display = role === 'authority' ? 'block' : 'none';
+      document.getElementById('reg-role-warning').style.display = (role === 'ward_member' || role === 'authority') ? 'block' : 'none';
+    }
+
+    // Alerts
+    function showAlert(text, isError = true) {
+      const banner = document.getElementById('alert-banner');
+      const textEl = document.getElementById('alert-text');
+      textEl.textContent = text;
+      banner.className = `alert-banner ${isError ? 'alert-error' : 'alert-success'}`;
+      banner.style.display = 'flex';
+    }
+
+    function hideAlert() {
+      document.getElementById('alert-banner').style.display = 'none';
+    }
+
+    // Load Wards and Departments
+    async function loadMetadata() {
+      try {
+        const resW = await fetch('/api/wards');
+        const dataW = await resW.json();
+        const wardSelect = document.getElementById('reg-ward');
+        wardSelect.innerHTML = dataW.data.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+
+        const resD = await fetch('/api/departments');
+        const dataD = await resD.json();
+        const deptSelect = document.getElementById('reg-dept');
+        deptSelect.innerHTML = dataD.data.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+      } catch (err) {
+        console.error('Failed to load wards/depts metadata:', err);
+      }
+    }
+
+    // Copy coordinate helpers
+    function copyGPS(lat, lng, name) {
+      localStorage.setItem('helper_lat', lat);
+      localStorage.setItem('helper_lng', lng);
+      showAlert(`Coordinates for ${name} stored! They will auto-fill in the submit form.`, false);
+      setTimeout(hideAlert, 4000);
+    }
+
+    // Login Action
+    async function submitLogin(e) {
+      e.preventDefault();
+      hideAlert();
+      const user = document.getElementById('login-username').value.trim();
+      const pass = document.getElementById('login-password').value;
+
+      const result = await auth.handleLogin(user, pass);
+      if (result.success) {
+        auth.redirectByRole(result.role);
+      } else {
+        showAlert(result.error);
+      }
+    }
+
+    // Registration Action
+    async function submitRegister(e) {
+      e.preventDefault();
+      hideAlert();
+      const username = document.getElementById('reg-username').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const full_name = document.getElementById('reg-fullname').value.trim();
+      const contact = document.getElementById('reg-contact').value.trim();
+      const role = document.getElementById('reg-role').value;
+
+      const payload = { username, password, full_name, contact, role };
+
+      if (role === 'ward_member') {
+        payload.ward_id = parseInt(document.getElementById('reg-ward').value);
+      } else if (role === 'authority') {
+        payload.department_id = parseInt(document.getElementById('reg-dept').value);
+      }
+
+      const result = await auth.handleRegister(payload);
+      if (result.success) {
+        showAlert('Registration completed! Please sign in.', false);
+        switchAuthTab('login');
+        document.getElementById('login-username').value = username;
+      } else {
+        showAlert(result.error);
+      }
+    }
+
+    // Initial page load
+    window.addEventListener('load', async () => {
+      // Load translation and check state
+      await loadMetadata();
+      // Auth Guard check: if already logged in, redirect away automatically
+      auth.checkAuthGuard();
+    });
+  </script>
+</body>
 </html>

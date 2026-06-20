@@ -1,0 +1,18 @@
+{
+    "id": "e4cbbf70-91e2-414c-9364-b8ea821fb1b0",
+    "title": "Broken road",
+    "description": "The road is broken; it has been months, and the administration keeps ignoring, in past few months, it has become the source of many accidents, please draw your attention towards it",
+    "category": "Road",
+    "area": "Adarsh Nagar",
+    "address": "Opposite to bombay store",
+    "location": {
+        "latitude": 30.106583,
+        "longitude": 78.292061
+    },
+    "reporter": {
+        "name": "Citizen User1",
+        "contact": "user1@test.com"
+    },
+    "media": [],
+    "created_at": "2026-06-20T12:11:41.643505+00:00"
+}

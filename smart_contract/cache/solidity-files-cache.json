@@ -1,8 +1,8 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "D:\\Decentralized_Tamper_Resistent_Civic_Issue_Reporting_System\\smart_contract\\contracts\\Verification.sol": {
-      "lastModificationDate": 1777257989489,
+    "D:\\Decentralized_Tamper_Resistant_Civic_Issue_Reporting_System\\smart_contract\\contracts\\Verification.sol": {
+      "lastModificationDate": 1781518146610,
       "contentHash": "e3d877eac961edbcf848002b98279d75",
       "sourceName": "contracts/Verification.sol",
       "solcConfig": {
@@ -35,6 +35,42 @@
       ],
       "artifacts": [
         "Verification"
+      ]
+    },
+    "D:\\Decentralized_Tamper_Resistant_Civic_Issue_Reporting_System\\smart_contract\\contracts\\CivicRegistry.sol": {
+      "lastModificationDate": 1781670518915,
+      "contentHash": "b64a4393b72c06ba48a6dcaa4c4bea93",
+      "sourceName": "contracts/CivicRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "CivicRegistry"
       ]
     }
   }

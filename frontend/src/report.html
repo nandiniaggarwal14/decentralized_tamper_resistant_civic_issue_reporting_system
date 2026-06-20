@@ -1,77 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Report Issue | Decentralized Tamper-Resistant Civic Issue Reporting System</title>
-    <link rel="stylesheet" href="/assets/styles.css" />
-  </head>
-  <body>
-    <main class="container">
-      <h1>Decentralized Tamper-Resistant Civic Issue Reporting System</h1>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="report_complaint">Report Issue — Citizen Dashboard</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div class="dashboard-layout">
 
-      <section class="card">
-        <div class="top-actions">
-          <h2>Report an Issue</h2>
-          <a class="action-link" href="/">Back to Dashboard</a>
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">🏛</div>
+        <div class="brand-text">
+          <h1 data-i18n="title">Decentralized Portal</h1>
+          <p data-i18n="subtitle">Citizen Console</p>
+        </div>
+      </div>
+
+      <!-- Profile Card -->
+      <div class="sidebar-profile">
+        <div class="profile-avatar" id="profile-initials">C</div>
+        <div class="profile-info">
+          <div class="name" id="profile-name">Citizen User</div>
+          <div class="role" id="profile-role" data-i18n="citizen">Citizen</div>
+        </div>
+      </div>
+
+      <!-- Navigation links -->
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/citizen.html">
+          <span>📋</span> <span data-i18n="public_feed">Public Feed</span>
+        </a>
+        <a class="nav-link active" href="/report.html">
+          <span>✍</span> <span data-i18n="report_complaint">Report Issue</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <select id="lang-select" class="lang-selector" style="width: 100%; margin-bottom: 16px;">
+          <option value="en">English (EN)</option>
+          <option value="hi">हिंदी (HI)</option>
+        </select>
+        <button onclick="auth.logout()" class="btn btn-danger" style="width: 100%;" data-i18n="signout">Logout</button>
+      </div>
+    </aside>
+
+    <!-- RIGHT CONTENT AREA -->
+    <main style="padding: 40px; overflow-y: auto; height: 100vh; width: 100%;">
+      <div style="max-width: 700px; margin: 0 auto;">
+        
+        <div style="margin-bottom: 32px;">
+          <h2 data-i18n="submit_new">Submit New Civic Complaint</h2>
+          <p style="font-size: 0.9rem; color: var(--text-secondary);">Your report will be stored permanently in IPFS and secured on the Ethereum Sepolia chain</p>
         </div>
 
-        <form id="issue-form" class="grid" enctype="multipart/form-data">
-          <label class="field">
-            <span>Title *</span>
-            <input type="text" name="title" minlength="5" required />
-          </label>
+        <!-- Notification Banner -->
+        <div id="alert-banner" class="alert-banner alert-success" style="display: none;">
+          <span id="alert-text">Status update message</span>
+        </div>
 
-          <label class="field">
-            <span>Category *</span>
-            <input type="text" name="category" placeholder="Road, Water, Garbage..." required />
-          </label>
+        <div class="card">
+          <form id="form-report" onsubmit="submitReportForm(event)">
+            
+            <div class="form-group">
+              <label for="complaint-title" data-i18n="issue_title">Issue Title</label>
+              <input type="text" id="complaint-title" required data-i18n-placeholder="issue_title_placeholder">
+            </div>
 
-          <label class="field full">
-            <span>Description *</span>
-            <textarea name="description" minlength="10" required></textarea>
-          </label>
+            <div class="form-group">
+              <label for="complaint-desc" data-i18n="issue_desc">Detailed Description</label>
+              <textarea id="complaint-desc" required data-i18n-placeholder="issue_desc_placeholder"></textarea>
+            </div>
 
-          <div class="field full">
-            <button type="button" id="location-btn" class="location-btn">Get Current Location</button>
-            <p id="location-status"></p>
-            <input type="hidden" name="latitude" id="latitude-input" required />
-            <input type="hidden" name="longitude" id="longitude-input" required />
-          </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="complaint-category" data-i18n="category">Category</label>
+                <select id="complaint-category" required>
+                  <option value="Road">Potholes & Roads</option>
+                  <option value="Water">Water Leakage / Pipeline</option>
+                  <option value="Electricity">Electricity / Street Lights</option>
+                  <option value="Garbage">Garbage / Sanitation</option>
+                  <option value="Safety">Safety & Hazards</option>
+                  <option value="Other">General / Miscellaneous</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="complaint-area" data-i18n="area_colony">Area / Colony</label>
+                <input type="text" id="complaint-area" required placeholder="e.g. Saket Block J">
+              </div>
+            </div>
 
-          <label class="field">
-            <span>Area *</span>
-            <input type="text" name="area" required />
-          </label>
+            <div class="form-group">
+              <label for="complaint-address" data-i18n="exact_address">Exact Address</label>
+              <input type="text" id="complaint-address" placeholder="e.g. Opposite Metro Gate 2">
+            </div>
 
-          <label class="field">
-            <span>Address</span>
-            <input type="text" name="address" />
-          </label>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="complaint-lat" data-i18n="gps_lat">GPS Latitude</label>
+                <input type="number" step="any" id="complaint-lat" required placeholder="e.g. 28.5244">
+              </div>
+              <div class="form-group">
+                <label for="complaint-lng" data-i18n="gps_lng">GPS Longitude</label>
+                <input type="number" step="any" id="complaint-lng" required placeholder="e.g. 77.2066">
+              </div>
+            </div>
 
-          <label class="field">
-            <span>Reporter Name *</span>
-            <input type="text" name="reporter_name" required />
-          </label>
+            <div style="margin-bottom: 24px; display: flex; gap: 12px; align-items: center;">
+              <button type="button" onclick="getCurrentGPS()" class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 16px;" data-i18n="detect_gps">Auto-Detect GPS</button>
+              <span id="gps-status" style="font-size: 0.8rem; color: var(--text-muted);"></span>
+            </div>
 
-          <label class="field">
-            <span>Contact</span>
-            <input type="text" name="contact" />
-          </label>
+            <!-- Enhanced Direct Browser Recording Controls -->
+            <div class="record-panel">
+              <label style="font-weight: bold; margin-bottom: 12px;" data-i18n="or_record_direct">Or Record Directly in Browser:</label>
+              
+              <div class="record-btn-row">
+                <button type="button" id="btn-start-audio" class="btn btn-secondary" style="font-size: 0.8rem; padding: 8px 14px;" onclick="startAudioRecording()">🎙 <span data-i18n="start_audio_rec">Record Audio</span></button>
+                <button type="button" id="btn-stop-audio" class="btn btn-danger" style="font-size: 0.8rem; padding: 8px 14px; display: none;" onclick="stopAudioRecording()">⏹ <span data-i18n="stop_audio_rec">Stop Audio</span></button>
+                
+                <button type="button" id="btn-start-video" class="btn btn-secondary" style="font-size: 0.8rem; padding: 8px 14px;" onclick="startVideoRecording()">📹 <span data-i18n="start_video_rec">Record Video</span></button>
+                <button type="button" id="btn-stop-video" class="btn btn-danger" style="font-size: 0.8rem; padding: 8px 14px; display: none;" onclick="stopVideoRecording()">⏹ <span data-i18n="stop_video_rec">Stop Video</span></button>
+              </div>
 
-          <label class="field full">
-            <span>Image</span>
-            <input type="file" name="image" accept="image/*" />
-          </label>
+              <!-- Recording indicator light -->
+              <div id="recording-status" class="recording-indicator" style="display: none;">
+                <div class="pulse-dot"></div>
+                <span id="recording-status-text">Recording Live Feed...</span>
+              </div>
 
-          <div class="field full">
-            <button id="submit-btn" type="submit">Submit Issue</button>
-            <p id="message"></p>
-          </div>
-        </form>
-      </section>
+              <video id="video-preview" class="video-preview-window" autoplay muted></video>
+              <div id="audio-playback-container" style="margin-top: 10px; display: none;">
+                <audio id="audio-playback" controls style="width: 100%; height: 32px;"></audio>
+              </div>
+            </div>
+
+            <!-- Standard File inputs -->
+            <div class="form-group" style="border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px;">
+              <label style="font-weight: bold;" data-i18n="add_media">Add Media Attachments (Fallback File Uploads)</label>
+              
+              <div class="form-row" style="margin-top: 12px;">
+                <div>
+                  <label data-i18n="photo_image" style="font-size: 0.75rem;">Photo (Image)</label>
+                  <input type="file" id="media-img" accept="image/*">
+                </div>
+                <div>
+                  <label data-i18n="audio_recording" style="font-size: 0.75rem;">Audio File</label>
+                  <input type="file" id="media-aud" accept="audio/*">
+                </div>
+              </div>
+              <div style="margin-top: 12px;">
+                <label data-i18n="video_file" style="font-size: 0.75rem;">Video File</label>
+                <input type="file" id="media-vid" accept="video/*">
+              </div>
+            </div>
+
+            <div class="form-row" style="border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px;">
+              <div class="form-group">
+                <label for="complaint-reporter" data-i18n="reporter_name">Reporter Name</label>
+                <input type="text" id="complaint-reporter" required>
+              </div>
+              <div class="form-group">
+                <label for="complaint-contact" data-i18n="contact">Contact Info</label>
+                <input type="text" id="complaint-contact">
+              </div>
+            </div>
+
+            <button type="submit" id="btn-submit" class="btn" style="width: 100%; margin-top: 16px;" data-i18n="submit_ipfs">Upload to IPFS & Submit to Blockchain</button>
+          </form>
+        </div>
+
+      </div>
     </main>
 
-    <script src="/assets/report.js"></script>
-  </body>
+  </div>
+
+  <script src="/assets/i18n.js"></script>
+  <script src="/assets/auth.js"></script>
+  <script src="/assets/report.js"></script>
+</body>
 </html>

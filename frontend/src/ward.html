@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="ward_panel">Ward Member Dashboard</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">🏛</div>
+        <div class="brand-text">
+          <h1 data-i18n="title">Decentralized Portal</h1>
+          <p data-i18n="subtitle">Ward Console</p>
+        </div>
+      </div>
+
+      <!-- Profile Card -->
+      <div class="sidebar-profile">
+        <div class="profile-avatar" id="profile-initials">WM</div>
+        <div class="profile-info">
+          <div class="name" id="profile-name">Ward Member</div>
+          <div class="role" id="profile-role">Ward Representative</div>
+        </div>
+      </div>
+
+      <!-- Navigation links -->
+      <nav class="sidebar-nav">
+        <a class="nav-link active" id="tab-link-queue" onclick="switchTab('queue')">
+          <span>📋</span> <span data-i18n="ward_panel">Ward Queue</span>
+        </a>
+        <a class="nav-link" id="tab-link-analytics" onclick="switchTab('analytics')">
+          <span>📊</span> <span>Ward Analytics</span>
+        </a>
+        <a class="nav-link" id="tab-link-profile" onclick="switchTab('profile')">
+          <span>👤</span> <span>Profile & Audit</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <select id="lang-select" class="lang-selector" style="width: 100%; margin-bottom: 16px;">
+          <option value="en">English (EN)</option>
+          <option value="hi">हिंदी (HI)</option>
+        </select>
+        <button onclick="auth.logout()" class="btn btn-danger" style="width: 100%;" data-i18n="signout">Logout</button>
+      </div>
+    </aside>
+
+    <!-- RIGHT CONTENT AREA -->
+    <main style="padding: 40px; overflow-y: auto; height: 100vh; width: 100%;">
+      <div style="max-width: 800px; margin: 0 auto;">
+        
+        <!-- Notification Banner -->
+        <div id="alert-banner" class="alert-banner alert-success" style="display: none; margin-bottom: 24px;">
+          <span id="alert-text">Status update message</span>
+        </div>
+
+        <!-- TAB 1: ASSIGNED WARD COMPLAINTS QUEUE -->
+        <div id="tab-queue" class="tab-content">
+          <!-- Welcome Header -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+            <div>
+              <h2 data-i18n="ward_member_title">Assigned Ward Complaints</h2>
+              <p id="ward-subtitle" style="font-size: 0.9rem; color: var(--text-secondary);">Review local area submissions, set resolution priority, and map departments</p>
+            </div>
+            <button onclick="loadWardIssues()" class="btn btn-secondary" style="padding: 8px 16px;" data-i18n="refresh">Refresh</button>
+          </div>
+
+          <!-- List of Issues -->
+          <div id="ward-issues-container" class="feed-grid">
+            <p style="text-align: center; color: var(--text-secondary); padding: 40px;" data-i18n="loading_reports">Loading ward complaints queue...</p>
+          </div>
+        </div>
+
+        <!-- TAB 2: WARD ANALYTICS -->
+        <div id="tab-analytics" class="tab-content" style="display: none;">
+          <h2 style="margin-bottom: 8px;">Ward Performance & Analytics</h2>
+          <p style="color: var(--text-secondary); margin-bottom: 32px;">Real-time metrics and response tracking for your ward jurisdiction</p>
+
+          <div class="admin-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 32px;">
+            <div class="admin-card" style="text-align: center;">
+              <p style="font-size: 0.85rem; color: var(--text-secondary);">Total Complaints Received</p>
+              <h2 style="font-size: 2.5rem; margin-top: 12px; color: var(--primary);" id="stats-total">-</h2>
+            </div>
+            <div class="admin-card" style="text-align: center;">
+              <p style="font-size: 0.85rem; color: var(--text-secondary);">Average Resolution Speed</p>
+              <h2 style="font-size: 2.5rem; margin-top: 12px; color: var(--success);" id="stats-speed">-</h2>
+              <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Hours from log to proof publication</p>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+            <!-- Status Distribution -->
+            <div class="admin-card">
+              <h3 style="font-size: 1rem; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Status Breakdown</h3>
+              <div style="display: flex; flex-direction: column; gap: 12px;" id="stats-status-list">
+                <!-- Status bars populated dynamically -->
+              </div>
+            </div>
+            <!-- Priority Distribution -->
+            <div class="admin-card">
+              <h3 style="font-size: 1rem; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Priority Distribution</h3>
+              <div style="display: flex; flex-direction: column; gap: 12px;" id="stats-priority-list">
+                <!-- Priority bars populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Issues by Category -->
+          <div class="admin-card">
+            <h3 style="font-size: 1rem; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Top Complaint Categories</h3>
+            <div id="stats-categories-list" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- Categories list populated dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: PROFILE & BLOCKCHAIN AUDIT -->
+        <div id="tab-profile" class="tab-content" style="display: none;">
+          <h2 style="margin-bottom: 8px;">Personal Profile Settings</h2>
+          <p style="color: var(--text-secondary); margin-bottom: 32px;">Update your details and review your decentralized IPFS profile ledger</p>
+
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px;">
+            <!-- Editing Form -->
+            <div class="admin-card">
+              <h3 style="font-size: 1rem; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Edit Profile</h3>
+              <form id="form-profile-edit" onsubmit="updateProfile(event)">
+                <div class="form-group" style="margin-bottom: 16px;">
+                  <label for="profile-username" style="font-size: 0.8rem; color: var(--text-secondary);">Username (Locked)</label>
+                  <input type="text" id="profile-username" readonly style="opacity: 0.5; background: rgba(0,0,0,0.2);">
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                  <label for="profile-fullname" style="font-size: 0.8rem; color: var(--text-secondary);">Full Name</label>
+                  <input type="text" id="profile-fullname" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                  <label for="profile-contact" style="font-size: 0.8rem; color: var(--text-secondary);">Contact Number / Email</label>
+                  <input type="text" id="profile-contact">
+                </div>
+                <button type="submit" id="btn-save-profile" class="btn" style="width: 100%;">Save Changes & Update IPFS</button>
+              </form>
+            </div>
+
+            <!-- Ledger Audit Card -->
+            <div class="admin-card">
+              <h3 style="font-size: 1rem; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Decentralized Audit</h3>
+              <div style="display: flex; flex-direction: column; gap: 16px; font-size: 0.85rem;">
+                <div>
+                  <p style="font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Assigned Jurisdiction:</p>
+                  <p id="audit-jurisdiction" style="font-weight: 500; color: #fff;">-</p>
+                </div>
+                <div>
+                  <p style="font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">IPFS Profile Metadata CID:</p>
+                  <a id="audit-ipfs-link" target="_blank" style="font-family: monospace; font-size: 0.75rem; word-break: break-all;">-</a>
+                </div>
+                <div>
+                  <p style="font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Database Anchor Hash:</p>
+                  <p id="audit-db-hash" style="font-family: monospace; font-size: 0.75rem; word-break: break-all;">-</p>
+                </div>
+                <div>
+                  <p style="font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">On-Chain Anchored Hash:</p>
+                  <p id="audit-chain-hash" style="font-family: monospace; font-size: 0.75rem; word-break: break-all;">-</p>
+                </div>
+                <div style="border-top: 1px solid var(--border); padding-top: 16px; display: flex; align-items: center; justify-content: space-between;">
+                  <span style="font-weight: 600;">Ledger Status:</span>
+                  <span id="audit-status-badge" class="status-badge pending">Checking...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Pending Approval Overlay -->
+  <div id="pending-overlay" class="overlay-container" style="display: none;">
+    <div class="overlay-card">
+      <div class="overlay-icon">⏳</div>
+      <h2 data-i18n="pending_approval_title">Account Pending Approval</h2>
+      <p data-i18n="pending_approval_desc">Your account is pending administrator approval. You will gain access once approved.</p>
+      <button onclick="auth.logout()" class="btn btn-danger" style="margin-top: 24px; padding: 10px 24px;" data-i18n="signout">Sign Out</button>
+    </div>
+  </div>
+
+  <script src="/assets/i18n.js"></script>
+  <script src="/assets/auth.js"></script>
+  <script src="/assets/ward.js"></script>
+</body>
+</html>
