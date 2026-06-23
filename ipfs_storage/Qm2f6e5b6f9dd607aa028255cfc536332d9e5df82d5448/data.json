@@ -1,0 +1,25 @@
+{
+    "id": "efc7f505-95a6-4df2-905f-15e2be64e36e",
+    "title": "Broken road",
+    "description": "Road is broken",
+    "category": "Road",
+    "area": "Adarsh Nagar",
+    "address": "Opposite to bombay store",
+    "location": {
+        "latitude": 30.106725,
+        "longitude": 78.292055
+    },
+    "reporter": {
+        "name": "Molly",
+        "contact": "123456789"
+    },
+    "media": [
+        {
+            "type": "image",
+            "url": "/uploads/c4a1fffe-bb5a-450a-b820-cc4a15b96148_road.jpg",
+            "cid": "Qmf8f32j8MnwZJ9NkMCxo4qriEvuWpwZuj2QUaak2622wC",
+            "filename": "c4a1fffe-bb5a-450a-b820-cc4a15b96148_road.jpg"
+        }
+    ],
+    "created_at": "2026-06-20T15:07:36.318468+00:00"
+}

@@ -124,12 +124,10 @@ function renderAuthorityIssues(issues) {
     if (issue.status === 'pending') {
       actionButtons = `
         <button onclick="updateStatus('${issue.id}', 'in_progress')" class="btn btn-secondary" style="padding: 8px 16px;" data-i18n="mark_inprogress">Mark In Progress</button>
-        <button onclick="updateStatus('${issue.id}', 'rejected')" class="btn btn-danger" style="padding: 8px 16px;" data-i18n="reject_issue">Reject Issue</button>
       `;
     } else if (issue.status === 'in_progress') {
       actionButtons = `
         <button onclick="openResolveDialog('${issue.id}')" class="btn btn-success" style="padding: 8px 16px;" data-i18n="resolve_issue">Resolve Issue</button>
-        <button onclick="updateStatus('${issue.id}', 'rejected')" class="btn btn-danger" style="padding: 8px 16px;" data-i18n="reject_issue">Reject Issue</button>
       `;
     } else {
       actionButtons = `<span style="font-size:0.85rem; color: var(--text-muted);">Issue finalized. Integrity locked.</span>`;
@@ -152,6 +150,7 @@ function renderAuthorityIssues(issues) {
           <div>📍 <strong>Location:</strong> ${escapeHtml(issue.address || 'GPS Coordinates Only')}</div>
           <div>🏛 <strong>Ward:</strong> ${escapeHtml(issue.ward_name || 'Unassigned')}</div>
           <div>👤 <strong>Reporter:</strong> ${escapeHtml(issue.reporter_name)} (${escapeHtml(issue.contact || 'N/A')})</div>
+          <div>👍 <strong>Upvotes:</strong> ${issue.votes ? issue.votes.upvotes : 0}</div>
         </div>
 
         <!-- Render captured files -->

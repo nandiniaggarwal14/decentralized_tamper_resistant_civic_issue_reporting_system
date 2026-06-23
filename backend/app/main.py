@@ -350,6 +350,35 @@ def _serialize_issue(row: dict) -> dict:
         },
     }
 
+def _assign_dynamic_priorities(issues: list) -> list:
+    n = len(issues)
+    if n == 0:
+        return issues
+    
+    for i, issue in enumerate(issues):
+        if n == 1:
+            issue["priority"] = "critical"
+        elif n == 2:
+            issue["priority"] = "critical" if i == 0 else "low"
+        elif n == 3:
+            if i == 0:
+                issue["priority"] = "critical"
+            elif i == 1:
+                issue["priority"] = "medium"
+            else:
+                issue["priority"] = "low"
+        else:
+            pct = i / n
+            if pct < 0.25:
+                issue["priority"] = "critical"
+            elif pct < 0.50:
+                issue["priority"] = "high"
+            elif pct < 0.75:
+                issue["priority"] = "medium"
+            else:
+                issue["priority"] = "low"
+    return issues
+
 # --- HTML Page Routes ---
 @app.get("/")
 @app.get("/index.html")
@@ -598,13 +627,14 @@ async def get_issues(
                     LEFT JOIN departments d ON i.department_id = d.id
                     LEFT JOIN issue_votes uv
                         ON uv.issue_id = i.id AND uv.voter_id = %s
-                    ORDER BY i.created_at DESC
+                    ORDER BY i.upvote_count DESC, i.created_at DESC
                     """,
                     (voter_id or "",),
                 )
                 rows = cursor.fetchall()
 
         items = [_serialize_issue(row) for row in rows]
+        items = _assign_dynamic_priorities(items)
         return {"success": True, "count": len(items), "data": items}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to fetch issues: {exc}") from exc
@@ -751,7 +781,7 @@ async def create_issue(
                         %s, %s, %s, %s, %s, %s,
                         %s, %s, %s, %s,
                         %s, %s, 'pending', %s,
-                        %s, %s, %s, 'medium', %s, %s
+                        %s, %s, %s, 'low', %s, %s
                     )
                     RETURNING id
                     """,
@@ -983,13 +1013,14 @@ async def get_ward_issues(current_user: UserResponse = Depends(RoleChecker(["war
                     JOIN wards w ON i.ward_id = w.id
                     LEFT JOIN departments d ON i.department_id = d.id
                     WHERE w.ward_member_id = %s
-                    ORDER BY i.created_at DESC
+                    ORDER BY i.upvote_count DESC, i.created_at DESC
                     """,
                     (current_user.id,)
                 )
                 rows = cursor.fetchall()
 
         items = [_serialize_issue(row) for row in rows]
+        items = _assign_dynamic_priorities(items)
         return {"success": True, "count": len(items), "data": items}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to fetch ward issues: {exc}")
@@ -1000,35 +1031,7 @@ async def update_issue_priority(
     req: PriorityRequest,
     current_user: UserResponse = Depends(RoleChecker(["ward_member"]))
 ) -> dict:
-    if req.priority not in {"low", "medium", "high", "critical"}:
-        raise HTTPException(status_code=400, detail="Invalid priority level")
-
-    try:
-        with get_connection() as conn:
-            with conn.cursor() as cursor:
-                # Check if this ward member owns the issue's ward
-                cursor.execute(
-                    """
-                    SELECT i.id, i.status FROM issues i
-                    JOIN wards w ON i.ward_id = w.id
-                    WHERE i.id = %s AND w.ward_member_id = %s
-                    """,
-                    (issue_id, current_user.id)
-                )
-                issue = cursor.fetchone()
-                if not issue:
-                    raise HTTPException(status_code=403, detail="Not authorized to edit issues in another ward")
-
-                cursor.execute(
-                    "UPDATE issues SET priority = %s WHERE id = %s",
-                    (req.priority, issue_id)
-                )
-            conn.commit()
-        return {"success": True, "message": f"Priority updated to {req.priority}"}
-    except HTTPException:
-        raise
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to update priority: {exc}")
+    raise HTTPException(status_code=403, detail="Priority updates are handled automatically by user votes.")
 
 @app.post("/api/ward/issues/{issue_id}/redirect")
 async def redirect_issue(
@@ -1243,13 +1246,14 @@ async def get_authority_issues(current_user: UserResponse = Depends(RoleChecker(
                     LEFT JOIN wards w ON i.ward_id = w.id
                     JOIN departments d ON i.department_id = d.id
                     WHERE d.id = %s
-                    ORDER BY i.created_at DESC
+                    ORDER BY i.upvote_count DESC, i.created_at DESC
                     """,
                     (current_user.department_id,)
                 )
                 rows = cursor.fetchall()
 
         items = [_serialize_issue(row) for row in rows]
+        items = _assign_dynamic_priorities(items)
         return {"success": True, "count": len(items), "data": items}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to fetch authority issues: {exc}")
@@ -1260,7 +1264,7 @@ async def update_issue_status(
     req: StatusRequest,
     current_user: UserResponse = Depends(RoleChecker(["authority", "ward_member"]))
 ) -> dict:
-    if req.status not in {"pending", "in_progress", "resolved", "rejected"}:
+    if req.status not in {"pending", "in_progress", "resolved"}:
         raise HTTPException(status_code=400, detail="Invalid status type")
 
     try:

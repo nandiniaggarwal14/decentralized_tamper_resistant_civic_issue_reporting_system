@@ -1,0 +1,25 @@
+{
+    "id": "e7ae43f9-2dee-4a35-864f-badf0844acce",
+    "title": "Poor sanitation",
+    "description": "Please look into the matter",
+    "category": "Garbage",
+    "area": "Adarsh Nagar",
+    "address": "Opposite to bombay Store",
+    "location": {
+        "latitude": 30.10683,
+        "longitude": 78.291993
+    },
+    "reporter": {
+        "name": "citizen",
+        "contact": "123456789"
+    },
+    "media": [
+        {
+            "type": "image",
+            "url": "/uploads/4f1b7747-b547-4047-b719-5033f80056a0_garbage.jpeg",
+            "cid": "QmWxvoQRYb5T3Y5hdsMLScaE8kqwmmXKkMFaTjZgMCVFKz",
+            "filename": "4f1b7747-b547-4047-b719-5033f80056a0_garbage.jpeg"
+        }
+    ],
+    "created_at": "2026-06-21T18:38:54.214869+00:00"
+}

@@ -26,122 +26,78 @@
       </div>
     </header>
 
-    <!-- Main Entry Grid -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; margin-top: 20px;">
-      
-      <!-- Left Info Side -->
-      <div>
-        <div class="card" style="margin-bottom: 24px;">
-          <h2 data-i18n="system_status" style="margin-bottom: 16px;">System Integrity Node</h2>
-          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;">
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
-              <span data-i18n="database">Database Connection:</span>
-              <span id="status-db" data-i18n="checking" style="font-weight: bold; color: var(--warning);">Checking...</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
-              <span data-i18n="ipfs">IPFS Cluster Storage:</span>
-              <span id="status-ipfs" data-i18n="active" style="font-weight: bold; color: var(--success);">Active</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding-bottom: 4px;">
-              <span data-i18n="blockchain">Ethereum Sepolia Hash:</span>
-              <span id="status-blockchain" data-i18n="checking" style="font-weight: bold; color: var(--warning);">Checking...</span>
-            </div>
-          </div>
+    <!-- Main Entry Centered -->
+    <div style="max-width: 500px; margin: 40px auto 0 auto;">
+      <!-- Login/Register Card -->
+      <div class="card" style="padding: 32px;">
+        <div class="auth-tabs">
+          <div id="tab-login" class="auth-tab active" onclick="switchAuthTab('login')" data-i18n="login">Login</div>
+          <div id="tab-register" class="auth-tab" onclick="switchAuthTab('register')" data-i18n="register">Register</div>
         </div>
 
-        <div class="card">
-          <h2 data-i18n="gps_guide" style="margin-bottom: 12px;">Delhi Ward GPS Coordinates</h2>
-          <p data-i18n="gps_guide_sub" style="font-size: 0.85rem; margin-bottom: 16px;">Use these locations in reports to test automatic ward routing:</p>
-          <div class="gps-helper-grid">
-            <button class="gps-helper-btn" onclick="copyGPS(28.6315, 77.2167, 'Connaught Place (Ward 1)')">
-              <strong>Ward 1 (CP)</strong><br>28.6315, 77.2167
-            </button>
-            <button class="gps-helper-btn" onclick="copyGPS(28.6519, 77.1905, 'Karol Bagh (Ward 3)')">
-              <strong>Ward 3 (Karol Bagh)</strong><br>28.6519, 77.1905
-            </button>
-            <button class="gps-helper-btn" onclick="copyGPS(28.5244, 77.2066, 'Saket (Ward 4)')">
-              <strong>Ward 4 (Saket)</strong><br>28.5244, 77.2066
-            </button>
-            <button class="gps-helper-btn" onclick="copyGPS(28.5921, 77.0460, 'Dwarka (Ward 5)')">
-              <strong>Ward 5 (Dwarka)</strong><br>28.5921, 77.0460
-            </button>
-          </div>
+        <!-- Alert notification banner -->
+        <div id="alert-banner" class="alert-banner alert-error" style="display: none;">
+          <span id="alert-text">Error message here</span>
         </div>
+
+        <!-- Login Form -->
+        <form id="form-login" onsubmit="submitLogin(event)">
+          <div class="form-group">
+            <label for="login-username" data-i18n="username">Username</label>
+            <input type="text" id="login-username" required>
+          </div>
+          <div class="form-group">
+            <label for="login-password" data-i18n="password">Password</label>
+            <input type="password" id="login-password" required>
+          </div>
+          <button type="submit" class="btn" style="width: 100%; margin-top: 10px;" data-i18n="signin">Sign In</button>
+        </form>
+
+        <!-- Register Form -->
+        <form id="form-register" onsubmit="submitRegister(event)" style="display: none;">
+          <div class="form-group">
+            <label for="reg-username" data-i18n="username">Username</label>
+            <input type="text" id="reg-username" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-password" data-i18n="password">Password</label>
+            <input type="password" id="reg-password" required placeholder="Min 6 characters">
+          </div>
+          <div class="form-group">
+            <label for="reg-fullname" data-i18n="fullname">Full Name</label>
+            <input type="text" id="reg-fullname" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-contact" data-i18n="contact">Contact Info</label>
+            <input type="text" id="reg-contact">
+          </div>
+          <div class="form-group">
+            <label for="reg-role" data-i18n="role">Account Role</label>
+            <select id="reg-role" onchange="toggleRegFields()" required>
+              <option value="citizen" data-i18n="citizen">Citizen (General User)</option>
+              <option value="ward_member" data-i18n="ward_member">Ward Member (Local Representative)</option>
+              <option value="authority" data-i18n="authority">Government Department Authority</option>
+            </select>
+            <p id="reg-role-warning" style="font-size: 0.75rem; color: var(--warning); margin-top: 8px; display: none;">⚠ Requires administrator approval before dashboard access is granted.</p>
+          </div>
+
+          <!-- Dynamic Subfields -->
+          <div class="form-group" id="reg-ward-group" style="display: none;">
+            <label for="reg-ward" data-i18n="assigned_ward">Select Assigned Ward</label>
+            <select id="reg-ward">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group" id="reg-dept-group" style="display: none;">
+            <label for="reg-dept" data-i18n="select_department">Select Department</label>
+            <select id="reg-dept">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-secondary" style="width: 100%; margin-top: 10px;" data-i18n="create_account">Create Account</button>
+        </form>
       </div>
-
-      <!-- Right Login/Register Card -->
-      <div>
-        <div class="card" style="padding: 32px;">
-          <div class="auth-tabs">
-            <div id="tab-login" class="auth-tab active" onclick="switchAuthTab('login')" data-i18n="login">Login</div>
-            <div id="tab-register" class="auth-tab" onclick="switchAuthTab('register')" data-i18n="register">Register</div>
-          </div>
-
-          <!-- Alert notification banner -->
-          <div id="alert-banner" class="alert-banner alert-error" style="display: none;">
-            <span id="alert-text">Error message here</span>
-          </div>
-
-          <!-- Login Form -->
-          <form id="form-login" onsubmit="submitLogin(event)">
-            <div class="form-group">
-              <label for="login-username" data-i18n="username">Username</label>
-              <input type="text" id="login-username" required>
-            </div>
-            <div class="form-group">
-              <label for="login-password" data-i18n="password">Password</label>
-              <input type="password" id="login-password" required>
-            </div>
-            <button type="submit" class="btn" style="width: 100%; margin-top: 10px;" data-i18n="signin">Sign In</button>
-          </form>
-
-          <!-- Register Form -->
-          <form id="form-register" onsubmit="submitRegister(event)" style="display: none;">
-            <div class="form-group">
-              <label for="reg-username" data-i18n="username">Username</label>
-              <input type="text" id="reg-username" required>
-            </div>
-            <div class="form-group">
-              <label for="reg-password" data-i18n="password">Password</label>
-              <input type="password" id="reg-password" required placeholder="Min 6 characters">
-            </div>
-            <div class="form-group">
-              <label for="reg-fullname" data-i18n="fullname">Full Name</label>
-              <input type="text" id="reg-fullname" required>
-            </div>
-            <div class="form-group">
-              <label for="reg-contact" data-i18n="contact">Contact Info</label>
-              <input type="text" id="reg-contact">
-            </div>
-            <div class="form-group">
-              <label for="reg-role" data-i18n="role">Account Role</label>
-              <select id="reg-role" onchange="toggleRegFields()" required>
-                <option value="citizen" data-i18n="citizen">Citizen (General User)</option>
-                <option value="ward_member" data-i18n="ward_member">Ward Member (Local Representative)</option>
-                <option value="authority" data-i18n="authority">Government Department Authority</option>
-              </select>
-              <p id="reg-role-warning" style="font-size: 0.75rem; color: var(--warning); margin-top: 8px; display: none;">⚠ Requires administrator approval before dashboard access is granted.</p>
-            </div>
-
-            <!-- Dynamic Subfields -->
-            <div class="form-group" id="reg-ward-group" style="display: none;">
-              <label for="reg-ward" data-i18n="assigned_ward">Select Assigned Ward</label>
-              <select id="reg-ward">
-                <!-- Populated dynamically -->
-              </select>
-            </div>
-            <div class="form-group" id="reg-dept-group" style="display: none;">
-              <label for="reg-dept" data-i18n="select_department">Select Department</label>
-              <select id="reg-dept">
-                <!-- Populated dynamically -->
-              </select>
-            </div>
-
-            <button type="submit" class="btn btn-secondary" style="width: 100%; margin-top: 10px;" data-i18n="create_account">Create Account</button>
-          </form>
-        </div>
-      </div>
-
     </div>
   </div>
 

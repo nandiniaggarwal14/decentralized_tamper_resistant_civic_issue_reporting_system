@@ -154,6 +154,7 @@ function renderWardIssues(issues) {
         <div style="font-size: 0.85rem; margin: 12px 0; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
           <div>📍 <strong>Address:</strong> ${escapeHtml(issue.address || 'GPS Coordinates Only')}</div>
           <div>🏷 <strong>Category:</strong> ${escapeHtml(issue.category)}</div>
+          <div>👍 <strong>Upvotes:</strong> ${issue.votes ? issue.votes.upvotes : 0}</div>
         </div>
 
         <!-- Render captured files -->
@@ -163,16 +164,6 @@ function renderWardIssues(issues) {
           <!-- Actions panel -->
           <div style="display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
             
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span data-i18n="set_priority">Set Priority:</span>
-              <select onchange="setPriority('${issue.id}', this.value)" style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); color: #fff;">
-                <option value="low" ${issue.priority === 'low' ? 'selected' : ''}>Low</option>
-                <option value="medium" ${issue.priority === 'medium' ? 'selected' : ''}>Medium</option>
-                <option value="high" ${issue.priority === 'high' ? 'selected' : ''}>High</option>
-                <option value="critical" ${issue.priority === 'critical' ? 'selected' : ''}>Critical</option>
-              </select>
-            </div>
-
             <div style="display: flex; align-items: center; gap: 8px;">
               <span data-i18n="redirect_dept">Redirect Department:</span>
               <select id="redirect-dept-${issue.id}" style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); color: #fff;">

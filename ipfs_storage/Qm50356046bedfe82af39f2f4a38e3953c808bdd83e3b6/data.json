@@ -1,0 +1,25 @@
+{
+    "id": "55fa36ea-d601-4d2c-959d-7e8f7e2935ae",
+    "title": "Pothole",
+    "description": "So many Potholes in the area, please look into the matter.",
+    "category": "Road",
+    "area": "Adarsh Nagar",
+    "address": "Opposite to bombay store",
+    "location": {
+        "latitude": 30.10683,
+        "longitude": 78.291993
+    },
+    "reporter": {
+        "name": "citizen",
+        "contact": "123456789"
+    },
+    "media": [
+        {
+            "type": "image",
+            "url": "/uploads/83a3fab5-c131-44c8-b7ae-e57e804b54d6_pothole.jpeg",
+            "cid": "QmPfE9TmH2yDRG6QWjqjA3wE1oeYi6Bm2ysc5g8D5KQ9rq",
+            "filename": "83a3fab5-c131-44c8-b7ae-e57e804b54d6_pothole.jpeg"
+        }
+    ],
+    "created_at": "2026-06-21T18:34:54.060061+00:00"
+}

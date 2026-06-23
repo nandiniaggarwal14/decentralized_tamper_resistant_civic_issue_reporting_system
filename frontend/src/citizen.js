@@ -124,7 +124,7 @@ function renderIssues(issues) {
           <span>Area: <strong>${escapeHtml(issue.area)}</strong></span>
           <span>Reporter: <strong>${escapeHtml(issue.reporter.name)}</strong></span>
           <span>Ward: <strong>${issue.ward_name || 'Unassigned'}</strong></span>
-          <span>IPFS Root: <strong style="font-family: monospace; font-size: 0.75rem;">${issue.ipfs_cid ? issue.ipfs_cid.substring(0, 16) + '...' : 'None'}</strong></span>
+          <span>Upvotes: <strong>${issue.votes.upvotes}</strong></span>
         </div>
 
         <!-- Actions footer -->

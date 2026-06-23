@@ -154,18 +154,8 @@ def seed_users(cursor) -> None:
     )
     print("  Seeded admin user: admin / 123456789")
 
-    # 2. Seed citizens: user1, user2, user3
-    citizen_password_hash = get_password_hash("123456789")
-    for username in ["user1", "user2", "user3"]:
-        citizen_id = str(uuid.uuid4())
-        cursor.execute(
-            """
-            INSERT INTO users (id, username, password_hash, role, full_name, contact, is_approved)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """,
-            (citizen_id, username, citizen_password_hash, "citizen", f"Citizen {username.capitalize()}", f"{username}@test.com", True)
-        )
-        print(f"  Seeded citizen user: {username} / 123456789")
+    # 2. No other users are seeded by default to keep the database fresh and only contain the admin
+
 
 
 def main() -> None:

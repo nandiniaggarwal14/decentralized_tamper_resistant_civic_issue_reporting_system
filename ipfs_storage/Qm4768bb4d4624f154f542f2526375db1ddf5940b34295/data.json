@@ -1,0 +1,25 @@
+{
+    "id": "9d841a14-3d8b-490f-aa7f-7a2f5eb2e6a9",
+    "title": "Electricity outage",
+    "description": "Please look into the matter",
+    "category": "Electricity",
+    "area": "Adarsh Nagar",
+    "address": "Opposite to bombay Store",
+    "location": {
+        "latitude": 30.106369,
+        "longitude": 78.292175
+    },
+    "reporter": {
+        "name": "citizen",
+        "contact": "123456789"
+    },
+    "media": [
+        {
+            "type": "image",
+            "url": "/uploads/405feb27-3af4-40a4-905a-a6a706125ca8_electricity, tranformers.jpeg",
+            "cid": "QmfZcRPuQgorfXrf9fzNwsxFBVk9En22GDUURoosn7Q7rw",
+            "filename": "405feb27-3af4-40a4-905a-a6a706125ca8_electricity, tranformers.jpeg"
+        }
+    ],
+    "created_at": "2026-06-21T18:37:34.473128+00:00"
+}

@@ -1,0 +1,25 @@
+{
+    "id": "80403f1e-c95b-4544-98a7-49254911f195",
+    "title": "Broken road",
+    "description": "The road has been in this state for few months now, please look at the issue, and please fix it.",
+    "category": "Road",
+    "area": "Adarsh Nagar",
+    "address": "Opposite to bombay store",
+    "location": {
+        "latitude": 30.106534,
+        "longitude": 78.292178
+    },
+    "reporter": {
+        "name": "citizen",
+        "contact": "123456789"
+    },
+    "media": [
+        {
+            "type": "image",
+            "url": "/uploads/1f712771-1256-4b0c-9003-e07f799f2c77_road.jpg",
+            "cid": "Qmf8f32j8MnwZJ9NkMCxo4qriEvuWpwZuj2QUaak2622wC",
+            "filename": "1f712771-1256-4b0c-9003-e07f799f2c77_road.jpg"
+        }
+    ],
+    "created_at": "2026-06-21T18:32:16.488753+00:00"
+}
