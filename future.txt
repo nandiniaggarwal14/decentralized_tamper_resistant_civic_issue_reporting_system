@@ -1,3 +1,0 @@
-1. upvote mechanism
-2. role based login
-3. upvote threshold
