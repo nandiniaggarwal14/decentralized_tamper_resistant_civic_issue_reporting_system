@@ -63,7 +63,7 @@ def test_login_success(client, mock_db):
     mock_db.fetchone.return_value = {
         "id": "11111111-2222-3333-4444-555555555555",
         "username": "user1",
-        "password_hash": pw_hash,
+        "password": pw_hash,
         "role": "citizen",
         "full_name": "User One",
         "contact": "123",
@@ -88,7 +88,7 @@ def test_login_incorrect_password(client, mock_db):
     mock_db.fetchone.return_value = {
         "id": "11111111-2222-3333-4444-555555555555",
         "username": "user1",
-        "password_hash": pw_hash,
+        "password": pw_hash,
         "role": "citizen",
         "full_name": "User One",
         "contact": "123",

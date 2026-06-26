@@ -122,6 +122,8 @@ CREATE TABLE IF NOT EXISTS issue_status_history (
     changed_by UUID NOT NULL REFERENCES users(id),
     comments TEXT,
     proof_url TEXT,
+    ipfs_cid TEXT,
+    blockchain_hash TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

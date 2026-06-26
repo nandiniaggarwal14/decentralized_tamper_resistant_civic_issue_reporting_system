@@ -7,16 +7,18 @@ from pathlib import Path
 from typing import Any, Optional
 from fastapi import HTTPException
 
+from dotenv import load_dotenv
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(PROJECT_ROOT / ".env")
 
 INFURA_URL = os.getenv("INFURA_URL", "").strip()
 CONTRACT_ADDRESS = os.getenv("CONTRACT_ADDRESS", "").strip()
 WALLET_PRIVATE_KEY = os.getenv("WALLET_PRIVATE_KEY", "").strip()
 CHAIN_ID = int(os.getenv("CHAIN_ID", "11155111"))
 
-# Determine which ABI to use (prefer CivicRegistry if compiled, fallback to Verification.json)
-CIVIC_REGISTRY_ABI = PROJECT_ROOT / "backend" / "app" / "CivicRegistry.json"
-VERIFICATION_ABI = PROJECT_ROOT / "backend" / "app" / "Verification.json"
+# Determine which ABI to use (prefer CivicRegistry if compiled)
+CIVIC_REGISTRY_ABI = PROJECT_ROOT / "backend" / "app" / "abis" / "CivicRegistry.json"
 FAILED_TX_LOG = PROJECT_ROOT / "failed_transactions.json"
 
 web3_client = None
@@ -47,7 +49,7 @@ def init_blockchain() -> None:
         # Mock mode enabled silently
         return
 
-    abi_path = CIVIC_REGISTRY_ABI if CIVIC_REGISTRY_ABI.exists() else VERIFICATION_ABI
+    abi_path = CIVIC_REGISTRY_ABI
     if not abi_path.exists():
         # Fallback to smart_contract build if it exists
         candidate = PROJECT_ROOT / "smart_contract" / "artifacts" / "contracts" / "CivicRegistry.sol" / "CivicRegistry.json"
@@ -83,6 +85,21 @@ def init_blockchain() -> None:
 
 def is_blockchain_active() -> bool:
     return web3_client is not None and contract_instance is not None and signer_account is not None
+
+def get_wallet_address() -> Optional[str]:
+    """Return the wallet address used for signing transactions, or None if not active."""
+    if signer_account is not None:
+        return signer_account.address
+    return None
+
+def get_wallet_balance() -> Optional[int]:
+    """Return the wallet balance in Wei, or None if blockchain is not active."""
+    if web3_client is not None and signer_account is not None:
+        try:
+            return web3_client.eth.get_balance(signer_account.address)
+        except Exception:
+            return None
+    return None
 
 def _queue_failed_transaction(function_name: str, args: dict, error_message: str) -> None:
     from backend.app.database import get_connection
