@@ -123,7 +123,7 @@ async function loadAdminWards() {
             : `<span style="color:var(--text-secondary);font-size:0.85rem;">— unassigned —</span>`}
         </td>
         <td>
-          <button class="btn-icon danger" onclick="deleteWard(${w.id}, '${escapeHtml(w.name)}')">🗑 Delete</button>
+          <button class="btn-icon danger" onclick="deleteWard(${w.id}, '${escapeHtml(w.name)}')"> Delete</button>
         </td>
       </tr>
     `).join('');
@@ -272,12 +272,12 @@ async function loadAdminDepartments() {
                   <span style="font-weight:600;">${escapeHtml(a.full_name || a.username)}</span>
                   <span style="font-size:0.75rem;color:var(--text-secondary);">(${escapeHtml(a.designation)})</span>
                   <button class="btn-icon danger" style="font-size:0.7rem;padding:2px 6px;"
-                    onclick="removeAuthority(${d.id}, '${a.user_id}', '${escapeHtml(a.username)}')">✕</button>
+                    onclick="removeAuthority(${d.id}, '${a.user_id}', '${escapeHtml(a.username)}')"></button>
                 </div>
               `).join('')}
         </td>
         <td>
-          <button class="btn-icon danger" onclick="deleteDepartment(${d.id}, '${escapeHtml(d.name)}')">🗑 Delete</button>
+          <button class="btn-icon danger" onclick="deleteDepartment(${d.id}, '${escapeHtml(d.name)}')"> Delete</button>
         </td>
       </tr>
     `).join('');
@@ -405,8 +405,8 @@ function renderUsersTable(users) {
   }
   tbody.innerHTML = users.map(u => {
     let assignedTo = '—';
-    if (u.ward_name) assignedTo = `🗺 ${escapeHtml(u.ward_name)}`;
-    else if (u.department_name) assignedTo = `🏢 ${escapeHtml(u.department_name)}`;
+    if (u.ward_name) assignedTo = ` ${escapeHtml(u.ward_name)}`;
+    else if (u.department_name) assignedTo = ` ${escapeHtml(u.department_name)}`;
     const roleClass = u.role.replace(' ', '_');
     const joinDate = u.created_at ? new Date(u.created_at).toLocaleDateString() : '—';
     return `
@@ -417,8 +417,8 @@ function renderUsersTable(users) {
         <td style="font-size:0.85rem;">${assignedTo}</td>
         <td>
           ${u.is_approved
-            ? `<span class="status-badge approved" style="font-size:0.75rem;">✓ Yes</span>`
-            : `<span class="status-badge pending" style="font-size:0.75rem;">⏳ No</span>`}
+            ? `<span class="status-badge approved" style="font-size:0.75rem;"> Yes</span>`
+            : `<span class="status-badge pending" style="font-size:0.75rem;"> No</span>`}
         </td>
         <td style="font-size:0.8rem;color:var(--text-secondary);">${joinDate}</td>
       </tr>
