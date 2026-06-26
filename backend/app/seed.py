@@ -144,13 +144,13 @@ def seed_users(cursor) -> None:
     
     # 1. Seed admin
     admin_id = str(uuid.uuid4())
-    admin_password_hash = get_password_hash("123456789")
+    admin_password = get_password_hash("123456789")
     cursor.execute(
         """
-        INSERT INTO users (id, username, password_hash, role, full_name, contact, is_approved)
+        INSERT INTO users (id, username, password, role, full_name, contact, is_approved)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """,
-        (admin_id, "admin", admin_password_hash, "admin", "System Administrator", "admin@civicportal.gov", True)
+        (admin_id, "admin", admin_password, "admin", "System Administrator", "admin@civicportal.gov", True)
     )
     print("  Seeded admin user: admin / 123456789")
 

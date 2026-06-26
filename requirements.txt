@@ -25,6 +25,9 @@ web3==7.3.0
 # Authentication & Cryptography
 # ─────────────────────────────────────────────────────────────────────────────
 passlib[bcrypt]==1.7.4
+bcrypt==3.2.2          # MUST pin this — passlib 1.7.4 is incompatible with bcrypt>=4.0.0.
+                       # bcrypt 4.x changed its API and passlib's verify() silently returns
+                       # False for correct passwords on machines with the newer library.
 python-jose[cryptography]==3.3.0
 
 # ─────────────────────────────────────────────────────────────────────────────

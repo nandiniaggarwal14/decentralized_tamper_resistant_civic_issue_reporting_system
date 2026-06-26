@@ -23,6 +23,9 @@ contract CivicRegistry {
     // State
     // -----------------------------------------------------------------------
     address public owner;
+    
+    /// @notice Whitelist of addresses allowed to write hashes.
+    mapping(address => bool) public authorizedCallers;
 
     /// @notice SHA-256 hash of the original issue data, keyed by issue UUID.
     mapping(uint256 => string) private issueHashes;
@@ -46,6 +49,9 @@ contract CivicRegistry {
     /// @notice Emitted when a ward member or authority profile hash is stored.
     event PersonnelHashStored(uint256 indexed userId, string dataHash);
 
+    /// @notice Emitted when an address authorization status changes.
+    event CallerAuthorized(address indexed caller, bool status);
+
 
     // -----------------------------------------------------------------------
     // Modifiers
@@ -56,12 +62,32 @@ contract CivicRegistry {
         _;
     }
 
+    modifier onlyAuthorized() {
+        require(msg.sender == owner || authorizedCallers[msg.sender], "CivicRegistry: caller is not authorized");
+        _;
+    }
+
     // -----------------------------------------------------------------------
     // Constructor
     // -----------------------------------------------------------------------
 
     constructor() {
         owner = msg.sender;
+        authorizedCallers[msg.sender] = true;
+    }
+
+    // -----------------------------------------------------------------------
+    // Authorization management
+    // -----------------------------------------------------------------------
+
+    /**
+     * @notice Authorize or deauthorize a wallet address to write hashes.
+     * @param account The wallet address to change authorization for.
+     * @param status True to authorize, False to revoke access.
+     */
+    function authorizeAddress(address account, bool status) external onlyOwner {
+        authorizedCallers[account] = status;
+        emit CallerAuthorized(account, status);
     }
 
     // -----------------------------------------------------------------------
@@ -73,7 +99,7 @@ contract CivicRegistry {
      * @param issueId  uint256 representation of the issue UUID.
      * @param dataHash SHA-256 hex digest of the canonical issue payload.
      */
-    function storeIssueHash(uint256 issueId, string memory dataHash) external onlyOwner {
+    function storeIssueHash(uint256 issueId, string memory dataHash) external onlyAuthorized {
         issueHashes[issueId] = dataHash;
         emit IssueHashStored(issueId, dataHash);
     }
@@ -96,7 +122,7 @@ contract CivicRegistry {
      * @param issueId  uint256 representation of the issue UUID.
      * @param dataHash SHA-256 hex digest of the completion proof payload.
      */
-    function storeCompletionHash(uint256 issueId, string memory dataHash) external onlyOwner {
+    function storeCompletionHash(uint256 issueId, string memory dataHash) external onlyAuthorized {
         completionHashes[issueId] = dataHash;
         emit CompletionHashStored(issueId, dataHash);
     }
@@ -119,7 +145,7 @@ contract CivicRegistry {
      * @param userId   uint256 representation of the user UUID.
      * @param dataHash SHA-256 hex digest of the canonical profile payload.
      */
-    function storePersonnelHash(uint256 userId, string memory dataHash) external onlyOwner {
+    function storePersonnelHash(uint256 userId, string memory dataHash) external onlyAuthorized {
         personnelHashes[userId] = dataHash;
         emit PersonnelHashStored(userId, dataHash);
     }
