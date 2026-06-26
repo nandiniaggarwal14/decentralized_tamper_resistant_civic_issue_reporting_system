@@ -23,3 +23,12 @@ Thumbs.db
 
 # Uploads generated at runtime
 uploads/
+ipfs_storage/
+.pytest_cache/
+*.log
+failed_transactions.json
+
+# Hardhat build files
+smart_contract/cache/
+smart_contract/artifacts/
+

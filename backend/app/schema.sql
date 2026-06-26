@@ -10,7 +10,7 @@
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
     username VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL CHECK (role IN ('citizen', 'ward_member', 'authority', 'admin')),
     full_name VARCHAR(255) NOT NULL,
     contact VARCHAR(100),

@@ -518,7 +518,7 @@ async def register(req: RegisterRequest) -> dict:
                 # Insert user
                 cursor.execute(
                     """
-                    INSERT INTO users (id, username, password_hash, role, full_name, contact, is_approved)
+                    INSERT INTO users (id, username, password, role, full_name, contact, is_approved)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
                     """,
                     (user_id, req.username, pw_hash, req.role, req.full_name, req.contact, is_approved)
@@ -563,10 +563,10 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> dict:
     # Handles both OAuth2 standard form and can be adjusted if JSON is sent (we also support JSON login via separate login endpoint or this form)
     with get_connection() as conn:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT id, password_hash, role FROM users WHERE username = %s", (form_data.username,))
+            cursor.execute("SELECT id, password, role FROM users WHERE username = %s", (form_data.username,))
             user = cursor.fetchone()
-            
-    if not user or not verify_password(form_data.password, user["password_hash"]):
+
+    if not user or not verify_password(form_data.password, user["password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -580,10 +580,10 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> dict:
 async def json_login(req: LoginRequest) -> dict:
     with get_connection() as conn:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT id, password_hash, role FROM users WHERE username = %s", (req.username,))
+            cursor.execute("SELECT id, password, role FROM users WHERE username = %s", (req.username,))
             user = cursor.fetchone()
-            
-    if not user or not verify_password(req.password, user["password_hash"]):
+
+    if not user or not verify_password(req.password, user["password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
