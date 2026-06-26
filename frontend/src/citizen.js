@@ -59,7 +59,7 @@ function renderIssues(issues) {
   if (!issues || issues.length === 0) {
     feedContainer.innerHTML = `
       <div style="text-align: center; color: var(--text-muted); padding: 60px;">
-        <span style="font-size: 3rem; display: block; margin-bottom: 16px;"></span>
+        <span style="font-size: 3rem; display: block; margin-bottom: 16px;">🌱</span>
         <p data-i18n="no_reports">No civic issues reported yet.</p>
       </div>
     `;
@@ -129,7 +129,7 @@ function renderIssues(issues) {
 
         <!-- Actions footer -->
         <div class="issue-footer">
-          <button onclick="auditIssueHash('${issue.id}')" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;"> ${verifBtnText}</button>
+          <button onclick="auditIssueHash('${issue.id}')" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">🔍 ${verifBtnText}</button>
           
           <!-- Upvote Widget -->
           <div class="vote-widget">
@@ -183,12 +183,12 @@ async function auditIssueHash(issueId) {
     
     if (res.ok && data.success) {
       // Localized labels
-      const matchingLabel = window.i18n ? window.i18n.t('matching', 'Matching') : ' Matching';
-      const mismatchLabel = window.i18n ? window.i18n.t('discrepancy', 'Discrepancy!') : ' Discrepancy!';
-      const securedLabel = window.i18n ? window.i18n.t('verified_secured', 'Verified (Secured)') : ' Verified (Secured)';
-      const invalidLabel = window.i18n ? window.i18n.t('invalid_hash', 'Invalid Hash!') : ' Invalid Hash!';
-      const provenLabel = window.i18n ? window.i18n.t('resolution_proven', 'Resolution Proven') : ' Resolution Proven';
-      const badResolutionLabel = window.i18n ? window.i18n.t('hash_mismatch', 'Hash Mismatch!') : ' Hash Mismatch!';
+      const matchingLabel = window.i18n ? window.i18n.t('matching', 'Matching') : '✓ Matching';
+      const mismatchLabel = window.i18n ? window.i18n.t('discrepancy', 'Discrepancy!') : '✗ Discrepancy!';
+      const securedLabel = window.i18n ? window.i18n.t('verified_secured', 'Verified (Secured)') : '✓ Verified (Secured)';
+      const invalidLabel = window.i18n ? window.i18n.t('invalid_hash', 'Invalid Hash!') : '✗ Invalid Hash!';
+      const provenLabel = window.i18n ? window.i18n.t('resolution_proven', 'Resolution Proven') : '✓ Resolution Proven';
+      const badResolutionLabel = window.i18n ? window.i18n.t('hash_mismatch', 'Hash Mismatch!') : '✗ Hash Mismatch!';
 
       const dbStatus = data.database_consistent 
         ? `<span style="color: var(--success); font-weight:bold;">${matchingLabel}</span>` 

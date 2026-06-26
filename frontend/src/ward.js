@@ -108,7 +108,7 @@ function renderWardIssues(issues) {
   if (!issues || issues.length === 0) {
     issuesContainer.innerHTML = `
       <div style="text-align: center; color: var(--text-muted); padding: 60px;">
-        <span style="font-size: 3rem; display: block; margin-bottom: 16px;"></span>
+        <span style="font-size: 3rem; display: block; margin-bottom: 16px;">☕</span>
         <p data-i18n="no_ward_issues">No issues routed to your ward.</p>
       </div>
     `;
@@ -152,9 +152,9 @@ function renderWardIssues(issues) {
         <p class="issue-desc">${escapeHtml(issue.description)}</p>
         
         <div style="font-size: 0.85rem; margin: 12px 0; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
-          <div> <strong>Address:</strong> ${escapeHtml(issue.address || 'GPS Coordinates Only')}</div>
-          <div> <strong>Category:</strong> ${escapeHtml(issue.category)}</div>
-          <div> <strong>Upvotes:</strong> ${issue.votes ? issue.votes.upvotes : 0}</div>
+          <div>📍 <strong>Address:</strong> ${escapeHtml(issue.address || 'GPS Coordinates Only')}</div>
+          <div>🏷 <strong>Category:</strong> ${escapeHtml(issue.category)}</div>
+          <div>👍 <strong>Upvotes:</strong> ${issue.votes ? issue.votes.upvotes : 0}</div>
         </div>
 
         <!-- Render captured files -->
