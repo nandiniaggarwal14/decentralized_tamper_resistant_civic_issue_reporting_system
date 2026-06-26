@@ -123,7 +123,7 @@ async function loadAdminWards() {
             : `<span style="color:var(--text-secondary);font-size:0.85rem;">— unassigned —</span>`}
         </td>
         <td>
-          <button class="btn-icon danger" onclick="deleteWard(${w.id}, '${escapeHtml(w.name)}')">🗑 Delete</button>
+          <button class="btn-icon danger" onclick="deleteWard(${w.id}, '${escapeHtml(w.name)}')">Delete</button>
         </td>
       </tr>
     `).join('');
@@ -277,7 +277,7 @@ async function loadAdminDepartments() {
               `).join('')}
         </td>
         <td>
-          <button class="btn-icon danger" onclick="deleteDepartment(${d.id}, '${escapeHtml(d.name)}')">🗑 Delete</button>
+          <button class="btn-icon danger" onclick="deleteDepartment(${d.id}, '${escapeHtml(d.name)}')">Delete</button>
         </td>
       </tr>
     `).join('');
@@ -405,8 +405,8 @@ function renderUsersTable(users) {
   }
   tbody.innerHTML = users.map(u => {
     let assignedTo = '—';
-    if (u.ward_name) assignedTo = `🗺 ${escapeHtml(u.ward_name)}`;
-    else if (u.department_name) assignedTo = `🏢 ${escapeHtml(u.department_name)}`;
+    if (u.ward_name) assignedTo = `${escapeHtml(u.ward_name)}`;
+    else if (u.department_name) assignedTo = `${escapeHtml(u.department_name)}`;
     const roleClass = u.role.replace(' ', '_');
     const joinDate = u.created_at ? new Date(u.created_at).toLocaleDateString() : '—';
     return `
@@ -418,7 +418,7 @@ function renderUsersTable(users) {
         <td>
           ${u.is_approved
             ? `<span class="status-badge approved" style="font-size:0.75rem;">✓ Yes</span>`
-            : `<span class="status-badge pending" style="font-size:0.75rem;">⏳ No</span>`}
+            : `<span class="status-badge pending" style="font-size:0.75rem;">No</span>`}
         </td>
         <td style="font-size:0.8rem;color:var(--text-secondary);">${joinDate}</td>
       </tr>

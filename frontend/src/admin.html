@@ -88,7 +88,7 @@
     <!-- LEFT SIDEBAR -->
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-icon">🏛</div>
+        <div class="brand-icon">CP</div>
         <div class="brand-text">
           <h1 data-i18n="title">Decentralized Portal</h1>
           <p data-i18n="subtitle">Admin Console</p>
@@ -107,7 +107,7 @@
       <!-- Navigation links -->
       <nav class="sidebar-nav">
         <a class="nav-link active" href="/admin.html">
-          <span>📋</span> <span data-i18n="admin_dashboard">Admin Dashboard</span>
+          <span></span> <span data-i18n="admin_dashboard">Admin Dashboard</span>
         </a>
       </nav>
 
@@ -140,12 +140,12 @@
 
         <!-- Tab Navigation -->
         <div class="tab-nav">
-                    <button class="tab-btn active" onclick="switchTab('tab-overview')" id="tab-btn-overview">📊 Overview</button>
-          <button class="tab-btn" onclick="switchTab('tab-wards')" id="tab-btn-wards">🗺️ Wards</button>
-          <button class="tab-btn" onclick="switchTab('tab-departments')" id="tab-btn-departments">🏢 Departments</button>
-          <button class="tab-btn" onclick="switchTab('tab-users')" id="tab-btn-users">👥 All Users</button>
-          <button class="tab-btn" onclick="switchTab('tab-approvals')" id="tab-btn-approvals">✅ Approvals</button>
-          <button class="tab-btn" onclick="switchTab('tab-blockchain')" id="tab-btn-blockchain">⛓️ Blockchain</button>
+                    <button class="tab-btn active" onclick="switchTab('tab-overview')" id="tab-btn-overview">Overview</button>
+          <button class="tab-btn" onclick="switchTab('tab-wards')" id="tab-btn-wards">Wards</button>
+          <button class="tab-btn" onclick="switchTab('tab-departments')" id="tab-btn-departments">Departments</button>
+          <button class="tab-btn" onclick="switchTab('tab-users')" id="tab-btn-users">All Users</button>
+          <button class="tab-btn" onclick="switchTab('tab-approvals')" id="tab-btn-approvals">Approvals</button>
+          <button class="tab-btn" onclick="switchTab('tab-blockchain')" id="tab-btn-blockchain">Blockchain</button>
         </div>
 
         <!-- ==================== TAB: OVERVIEW ==================== -->
@@ -180,7 +180,7 @@
           <div class="mgmt-row">
             <!-- Create Ward form -->
             <div class="mgmt-card">
-              <h4>➕ Create New Ward</h4>
+              <h4>Create New Ward</h4>
               <div class="form-group">
                 <label>Ward Name</label>
                 <input type="text" id="ward-name" placeholder="e.g. Ward 1 – Connaught Place">
@@ -202,7 +202,7 @@
 
             <!-- Assign Ward Member form -->
             <div class="mgmt-card">
-              <h4>👤 Assign Member to Ward</h4>
+              <h4>Assign Member to Ward</h4>
               <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:12px;">Only users with the <strong>ward_member</strong> role can be assigned.</p>
               <div class="form-group">
                 <label>Select Ward</label>
@@ -218,7 +218,7 @@
           </div>
 
           <!-- Wards List -->
-          <h4 style="margin-bottom:12px;">📋 All Wards</h4>
+          <h4 style="margin-bottom:12px;">All Wards</h4>
           <div class="admin-table-container">
             <table class="admin-table">
               <thead>
@@ -238,7 +238,7 @@
           <div class="mgmt-row">
             <!-- Create Department form -->
             <div class="mgmt-card">
-              <h4>➕ Create New Department</h4>
+              <h4>Create New Department</h4>
               <div class="form-group">
                 <label>Department Name</label>
                 <input type="text" id="dept-name" placeholder="e.g. Public Works Department">
@@ -252,7 +252,7 @@
 
             <!-- Assign Authority form -->
             <div class="mgmt-card">
-              <h4>🔑 Assign Authority to Department</h4>
+              <h4>Assign Authority to Department</h4>
               <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:12px;">Only users with the <strong>authority</strong> role can be assigned.</p>
               <div class="form-group">
                 <label>Select Department</label>
@@ -271,7 +271,7 @@
           </div>
 
           <!-- Departments List -->
-          <h4 style="margin-bottom:12px;">📋 All Departments</h4>
+          <h4 style="margin-bottom:12px;">All Departments</h4>
           <div class="admin-table-container">
             <table class="admin-table">
               <thead>
@@ -289,7 +289,7 @@
         <!-- ==================== TAB: ALL USERS ==================== -->
         <div class="tab-panel" id="tab-users">
           <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; align-items:center;">
-            <input type="text" id="user-search" placeholder="🔍 Search by name or username…"
+            <input type="text" id="user-search" placeholder="Search by name or username…"
               style="padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-primary);flex:1;min-width:200px;"
               oninput="filterUsers()">
             <select id="user-role-filter" style="padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-primary);" onchange="filterUsers()">

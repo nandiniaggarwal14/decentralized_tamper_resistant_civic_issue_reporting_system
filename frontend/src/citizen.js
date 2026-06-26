@@ -59,7 +59,7 @@ function renderIssues(issues) {
   if (!issues || issues.length === 0) {
     feedContainer.innerHTML = `
       <div style="text-align: center; color: var(--text-muted); padding: 60px;">
-        <span style="font-size: 3rem; display: block; margin-bottom: 16px;">🌱</span>
+        <span style="font-size: 3rem; display: block; margin-bottom: 16px;"></span>
         <p data-i18n="no_reports">No civic issues reported yet.</p>
       </div>
     `;
@@ -129,7 +129,7 @@ function renderIssues(issues) {
 
         <!-- Actions footer -->
         <div class="issue-footer">
-          <button onclick="auditIssueHash('${issue.id}')" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">🔍 ${verifBtnText}</button>
+          <button onclick="auditIssueHash('${issue.id}')" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">${verifBtnText}</button>
           
           <!-- Upvote Widget -->
           <div class="vote-widget">
