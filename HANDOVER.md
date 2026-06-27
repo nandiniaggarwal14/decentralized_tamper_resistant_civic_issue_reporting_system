@@ -1,4 +1,4 @@
-# 🤝 Project Handover Document
+# Project Handover Document
 ## Decentralized Tamper-Resistant Civic Issue Reporting System
 
 > This document is intended for any developer or AI agent picking up this project. It covers the current state of the system, architectural decisions, known quirks, and a map of where everything lives.
@@ -11,7 +11,7 @@ A civic issue reporting platform where:
 - **Citizens** submit issues (potholes, power cuts, water leaks, etc.) with GPS location and evidence.
 - The backend **auto-routes** each issue to the correct **ward** (by GPS distance) and **government department** (by category).
 - Each issue is **cryptographically hashed (SHA-256)** and the hash is **anchored on the Ethereum Sepolia testnet** to create a tamper-proof audit trail.
-- **Upvotes** by citizens determine the **priority ranking** of issues — fully automated, no manual priority setting.
+- **Upvotes** by citizens determine the **priority ranking** of issues -- fully automated, no manual priority setting.
 - Role-based dashboards allow ward members and authorities to track and action issues.
 - An admin dashboard handles user approval and system monitoring.
 
@@ -21,39 +21,53 @@ A civic issue reporting platform where:
 
 ```
 root/
-├── backend/app/
-│   ├── main.py                ← ALL route handlers and business logic (~2250 lines)
-│   ├── auth.py                ← JWT creation, validation, role-based dependency injection
-│   ├── database.py            ← Neon PostgreSQL threaded connection pool (psycopg2)
-│   ├── schema.sql             ← Full DB schema; run via init_db() in database.py
-│   ├── seed.py                ← Wipe + re-seed: 7 depts, 8 wards, admin user only
-│   ├── routing.py             ← GPS haversine ward finder + category classifier
-│   ├── blockchain_service.py  ← Web3.py: store/verify SHA-256 hashes on Sepolia
-│   ├── ipfs_service.py        ← Simulated IPFS: writes JSON blobs locally
-│   ├── backfill_hashes.py     ← One-time script to hash pre-blockchain issues
-│   ├── verify_sync_status.py  ← Compares DB hashes vs on-chain hashes
-│   ├── CivicRegistry.json     ← ABI for the deployed Solidity contract
-│   └── tests/                 ← 24 unit tests (mock DB, no live DB needed)
-│
-├── frontend/src/
-│   ├── index.html             ← Login / Register page (centered, no stats cards)
-│   ├── citizen.html/.js       ← Issue feed, upvoting, hash verification
-│   ├── ward.html/.js          ← Ward issues, department redirect (no priority selector)
-│   ├── authority.html/.js     ← Dept queue, mark in-progress / resolve (no reject button)
-│   ├── admin.html/.js         ← User management, system stats
-│   ├── report.html/.js        ← Issue submission form with GPS, media upload
-│   ├── auth.js                ← Shared: login, register, token storage, redirects
-│   ├── i18n.js                ← Translation engine (en/hi)
-│   ├── styles.css             ← Global dark-mode design system
-│   └── lang/en.json, hi.json
-│
-├── smart_contract/            ← Hardhat project for Solidity contract
-├── uploads/                   ← Uploaded images/audio/video (served at /uploads/)
-├── ipfs_storage/              ← Simulated IPFS JSON blobs
-├── .env                       ← Secrets (see section 4)
-├── requirements.txt           ← Python dependencies (categorized)
-├── README.md                  ← Full project documentation
-└── HANDOVER.md                ← This file
+|-- backend/
+|   |-- app/
+|   |   |-- main.py                <-- FastAPI app, middleware, static mounts
+|   |   |-- config.py              <-- Centralised configuration constants
+|   |   |-- auth.py                <-- JWT creation, validation, password hashing (bcrypt)
+|   |   |-- database.py            <-- Neon PostgreSQL threaded connection pool (psycopg2)
+|   |   |-- schema.sql             <-- Full DB schema with migrations; run via init_db()
+|   |   |-- models.py              <-- Pydantic request/response models
+|   |   |-- helpers.py             <-- Shared utilities (hashing, priority calc, routing)
+|   |   |-- routing.py             <-- GPS haversine ward finder + category classifier
+|   |   |-- blockchain_service.py  <-- Web3.py: store/verify hashes on Sepolia (EIP-1559)
+|   |   |-- ipfs_service.py        <-- Simulated IPFS: writes JSON blobs locally
+|   |   |-- routes/
+|   |   |   |-- __init__.py
+|   |   |   |-- auth.py            <-- /api/auth/* endpoints
+|   |   |   |-- issues.py          <-- /api/issues/* endpoints
+|   |   |   |-- ward.py            <-- /api/ward/* endpoints
+|   |   |   |-- authority.py       <-- /api/authority/* endpoints
+|   |   |   |-- admin.py           <-- /api/admin/* endpoints
+|   |   |   |-- pages.py           <-- Static page serving (FileResponse)
+|   |   |-- abis/                  <-- Compiled contract ABIs
+|   |   |-- tests/                 <-- 24 unit tests (mock DB, no live DB needed)
+|   |-- scripts/
+|   |   |-- seed.py                <-- Truncate + re-seed: depts, wards, admin user
+|   |   |-- backfill_hashes.py     <-- One-time script to hash pre-blockchain issues
+|   |   |-- verify_sync_status.py  <-- Compares DB hashes vs on-chain hashes
+|   |   |-- reset_passwords.py     <-- Password reset utility
+|
+|-- frontend/src/
+|   |-- index.html                 <-- Login / Register page
+|   |-- citizen.html/.js           <-- Issue feed, upvoting, hash verification
+|   |-- ward.html/.js              <-- Ward issues, department redirect
+|   |-- authority.html/.js         <-- Dept queue, mark in-progress / resolve
+|   |-- admin.html/.js             <-- User mgmt, system stats, blockchain monitor
+|   |-- report.html/.js            <-- Issue submission form with GPS, media upload
+|   |-- auth.js                    <-- Shared: login, register, token storage, redirects
+|   |-- i18n.js                    <-- Translation engine (en/hi)
+|   |-- styles.css                 <-- Global dark-mode design system
+|   |-- lang/en.json, hi.json
+|
+|-- smart_contract/                <-- Hardhat project for Solidity contract
+|-- uploads/                       <-- Uploaded images/audio/video (gitignored)
+|-- ipfs_storage/                  <-- Simulated IPFS JSON blobs (gitignored)
+|-- .env                           <-- Secrets (never committed)
+|-- requirements.txt               <-- Python dependencies (categorized)
+|-- README.md                      <-- Full project documentation
+|-- HANDOVER.md                    <-- This file
 ```
 
 ---
@@ -66,11 +80,14 @@ root/
 2. POST /api/issues (multipart form)
 3. Backend:
    a. Saves media files to /uploads/
-   b. Simulates IPFS storage → generates local CID
-   c. GPS → routing_service.find_nearest_ward() → assigns ward_id
-   d. Category → routing_service.classify_issue() → assigns department_id
+   b. Simulates IPFS storage --> generates local CID
+   c. GPS --> routing_service.find_nearest_ward() --> assigns ward_id
+   d. Category --> routing_service.classify_issue() --> assigns department_id
    e. Computes SHA-256 hash of immutable fields
    f. Pushes hash to Ethereum Sepolia via blockchain_service.store_issue_hash()
+      - Transaction is broadcast and tx_hash returned immediately
+      - Receipt verification runs in a background daemon thread
+      - If receipt fails, transaction is queued in failed_blockchain_txns
    g. Inserts issue record into PostgreSQL (status='pending', priority='low')
 ```
 
@@ -79,14 +96,14 @@ root/
 1. Any GET /api/issues, /api/ward/issues, /api/authority/issues
 2. Backend queries DB: ORDER BY upvote_count DESC, created_at DESC
 3. Python function _assign_dynamic_priorities() applies percentile-based labels:
-   - Top 25%    → 'critical'
-   - 25–50%     → 'high'
-   - 50–75%     → 'medium'
-   - Bottom 25% → 'low'
+   - Top 25%    --> 'critical'
+   - 25-50%     --> 'high'
+   - 50-75%     --> 'medium'
+   - Bottom 25% --> 'low'
 4. Priority field in response is OVERWRITTEN by this function (DB value is ignored)
 ```
 
-> ⚠️ **Important**: The `priority` column in the database is vestigial for the list endpoints. Dynamic priority is always computed in Python at response time. The DB column is still written at creation time as `'low'`.
+> **Important**: The `priority` column in the database is vestigial for the list endpoints. Dynamic priority is always computed in Python at response time. The DB column is still written at creation time as `'low'`.
 
 ### Voting Flow
 ```
@@ -132,9 +149,12 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 | Manual priority removed from ward | Community votes should determine urgency, not individual officials |
 | GPS haversine routing | Deterministic, no external API needed |
 | Simulated IPFS locally | No Pinata/IPFS node required for dev/demo; CIDs are generated but files are local |
-| Neon PostgreSQL | Serverless-friendly, free tier sufficient for dev; may cold-start → seed script retries expected |
+| Neon PostgreSQL | Serverless-friendly, free tier sufficient for dev; may cold-start |
 | JWT in localStorage | Simple for demo; production would use httpOnly cookies |
-| bcrypt password hashing | Standard; passlib[bcrypt] handles salt automatically |
+| bcrypt password hashing | Standard; passlib[bcrypt] handles salt automatically. Pinned to bcrypt 3.2.2 for compatibility |
+| EIP-1559 gas settings | Dynamic base fee + priority fee ensures fast mining on Sepolia |
+| Non-blocking blockchain | Background thread tracks receipt; API responds instantly |
+| Modular routes | Routes split into auth.py, issues.py, ward.py, authority.py, admin.py for maintainability |
 
 ---
 
@@ -149,10 +169,13 @@ If `INFURA_URL` or `CONTRACT_ADDRESS` are missing/invalid, `blockchain_service.p
 ### IPFS is Simulated
 `ipfs_service.py` does NOT talk to a real IPFS node. It writes JSON files to `ipfs_storage/` and returns a deterministic fake CID. This is intentional for demo purposes.
 
+### bcrypt Version Pinning
+`requirements.txt` pins `bcrypt==3.2.2`. Do NOT upgrade bcrypt to 4.x without also upgrading passlib. The newer bcrypt API change causes `passlib.verify()` to silently return `False` for correct passwords.
+
 ### Auth Guards
-- `get_current_user` → requires valid JWT (any role)
-- `RoleChecker(["ward_member"])` → JWT + role enforcement
-- `get_optional_current_user` → used on public endpoints; returns None if no token
+- `get_current_user` --> requires valid JWT (any role)
+- `RoleChecker(["ward_member"])` --> JWT + role enforcement
+- `get_optional_current_user` --> used on public endpoints; returns None if no token
 
 ### Admin Credentials (Default After Seed)
 ```
@@ -160,21 +183,28 @@ Username: admin
 Password: 123456789
 ```
 
+### Seed Script Path
+The seed script is in `backend/scripts/seed.py` (not `backend/app/seed.py`). Run it as:
+```bash
+python -m backend.scripts.seed
+```
+
 ---
 
 ## 7. Database Tables Quick Reference
 
 ```sql
-users              → id, username, password_hash, role, full_name, contact, is_approved, ward_id, department_id
-wards              → id, name, center_latitude, center_longitude, radius_meters, ward_member_id
-departments        → id, name, description
-category_dept_map  → category (PK), department_id
-issues             → id, title, description, category, area, address, lat, lng, reporter_name, contact,
+users              -> id, username, password_hash, role, full_name, contact, is_approved, ward_id, department_id
+wards              -> id, name, center_latitude, center_longitude, radius_meters, ward_member_id
+departments        -> id, name, description
+category_dept_map  -> category (PK), department_id
+issues             -> id, title, description, category, area, address, lat, lng, reporter_name, contact,
                      image_url, hash, status, priority, ipfs_cid, media_urls, upvote_count, downvote_count,
                      user_id, ward_id, department_id, completion_proof_ipfs_cid, completion_hash, created_at
-issue_votes        → (issue_id, voter_id) PK, vote_type, created_at, updated_at
-issue_status_hist  → id, issue_id, old_status, new_status, changed_by, comments, proof_url, created_at
-failed_blockchain  → id, issue_id, issue_hash, error_message, retry_count, created_at
+issue_votes        -> (issue_id, voter_id) PK, vote_type, created_at, updated_at
+issue_status_hist  -> id, issue_id, old_status, new_status, changed_by, comments, ipfs_cid,
+                     blockchain_hash, proof_url, created_at
+failed_blockchain  -> id, function_name, args, error_message, retry_count, resolved_at, created_at
 ```
 
 ---
@@ -189,14 +219,14 @@ source .venv/bin/activate       # macOS/Linux
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Initialise DB schema (first time only)
+# 3. Initialise DB schema (safe to re-run)
 python -m backend.app.database
 
 # 4. Seed admin + reference data
-python -m backend.app.seed
+python -m backend.scripts.seed
 
 # 5. Start the server
-uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
+python -m backend.app.main
 
 # 6. Run tests
 python -m pytest
@@ -222,12 +252,12 @@ All 24 tests use a mock DB (no live Neon connection needed for tests).
 
 | URL | File | Role |
 |---|---|---|
-| `/` | `index.html` | Public — Login/Register |
-| `/report` | `report.html` | Citizen — Submit issue |
-| `/citizen` | `citizen.html` | Citizen — View feed, vote |
-| `/ward` | `ward.html` | Ward Member — Manage ward issues |
-| `/authority` | `authority.html` | Authority — Manage dept issues |
-| `/admin` | `admin.html` | Admin — User management |
+| `/` | `index.html` | Public -- Login/Register |
+| `/report` | `report.html` | Citizen -- Submit issue |
+| `/citizen` | `citizen.html` | Citizen -- View feed, vote |
+| `/ward` | `ward.html` | Ward Member -- Manage ward issues |
+| `/authority` | `authority.html` | Authority -- Manage dept issues |
+| `/admin` | `admin.html` | Admin -- User management, blockchain monitor |
 
 All pages check for a valid JWT on load and redirect to `/` if the token is missing or the role doesn't match.
 
@@ -248,7 +278,7 @@ All pages check for a valid JWT on load and redirect to `/` if the token is miss
 
 ## 12. Suggested Next Steps
 
-1. **Paginate issue lists** — large datasets will slow down `/api/issues` without LIMIT/OFFSET.
+1. **Paginate issue lists** -- large datasets will slow down `/api/issues` without LIMIT/OFFSET.
 2. **Replace simulated IPFS** with Pinata API calls for true decentralised storage.
 3. **Add map view** to citizen dashboard (Leaflet.js + Neon PostGIS or computed GPS).
 4. **Email notifications** when issue status changes (SendGrid or SMTP).

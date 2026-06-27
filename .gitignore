@@ -4,6 +4,9 @@ __pycache__/
 *.pyo
 *.pyd
 *.so
+*.egg-info/
+dist/
+build/
 
 # Virtual environments
 .venv/
@@ -20,15 +23,19 @@ smart_contract/node_modules/
 .DS_Store
 Thumbs.db
 .vscode/
+.idea/
 
-# Uploads generated at runtime
+# Runtime data (generated at startup, not source code)
 uploads/
 ipfs_storage/
+
+# Test & cache
 .pytest_cache/
 *.log
+
+# Legacy fallback file
 failed_transactions.json
 
 # Hardhat build files
 smart_contract/cache/
 smart_contract/artifacts/
-
