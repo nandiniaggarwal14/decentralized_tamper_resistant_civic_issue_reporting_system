@@ -149,7 +149,7 @@ def _store_issue_hash_onchain(issue_id: str, data_hash: str, wait_for_receipt: b
     contract: Any = contract_instance
     signer: Any = signer_account
 
-    nonce = w3.eth.get_transaction_count(signer.address)
+    nonce = w3.eth.get_transaction_count(signer.address, 'pending')
     contract_issue_id = _uuid_to_uint256(issue_id)
     
     if hasattr(contract.functions, "storeIssueHash"):
@@ -244,7 +244,7 @@ def _store_completion_hash_onchain(issue_id: str, completion_hash: str, wait_for
     contract: Any = contract_instance
     signer: Any = signer_account
 
-    nonce = w3.eth.get_transaction_count(signer.address)
+    nonce = w3.eth.get_transaction_count(signer.address, 'pending')
     contract_issue_id = _uuid_to_uint256(issue_id)
     
     if not hasattr(contract.functions, "storeCompletionHash"):
@@ -336,7 +336,7 @@ def _store_personnel_hash_onchain(user_id: str, data_hash: str, wait_for_receipt
     contract: Any = contract_instance
     signer: Any = signer_account
 
-    nonce = w3.eth.get_transaction_count(signer.address)
+    nonce = w3.eth.get_transaction_count(signer.address, 'pending')
     contract_user_id = _uuid_to_uint256(user_id)
     
     if not hasattr(contract.functions, "storePersonnelHash"):
