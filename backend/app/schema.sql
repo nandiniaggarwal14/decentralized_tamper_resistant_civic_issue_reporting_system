@@ -202,3 +202,9 @@ ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('citizen', 'wa
 
 -- Add indexes
 CREATE INDEX IF NOT EXISTS idx_users_is_approved ON users(is_approved);
+
+-- Add ipfs_cid column to issue_status_history if not exists
+ALTER TABLE issue_status_history ADD COLUMN IF NOT EXISTS ipfs_cid TEXT;
+
+-- Add blockchain_hash column to issue_status_history if not exists
+ALTER TABLE issue_status_history ADD COLUMN IF NOT EXISTS blockchain_hash TEXT;
