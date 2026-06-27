@@ -3,6 +3,7 @@ import json
 import hashlib
 import uuid
 import time
+import threading
 from pathlib import Path
 from typing import Any, Optional
 from fastapi import HTTPException
@@ -124,7 +125,26 @@ def _queue_failed_transaction(function_name: str, args: dict, error_message: str
             "timestamp": time.time()
         })
 
-def _store_issue_hash_onchain(issue_id: str, data_hash: str) -> str:
+def _wait_and_verify_receipt(tx_hash_bytes: bytes, function_name: str, args: dict) -> None:
+    def worker():
+        try:
+            from web3.exceptions import TimeExhausted, TransactionNotFound, Web3Exception
+            w3 = web3_client
+            receipt = w3.eth.wait_for_transaction_receipt(tx_hash_bytes, timeout=180)
+            if receipt.status != 1:
+                raise RuntimeError("On-chain transaction failed (receipt status 0)")
+            print(f"Transaction {tx_hash_bytes.hex()} ({function_name}) successfully mined on-chain.")
+        except Exception as e:
+            _queue_failed_transaction(
+                function_name=function_name,
+                args=args,
+                error_message=str(e)
+            )
+            
+    t = threading.Thread(target=worker, daemon=True)
+    t.start()
+
+def _store_issue_hash_onchain(issue_id: str, data_hash: str, wait_for_receipt: bool = False) -> str:
     w3: Any = web3_client
     contract: Any = contract_instance
     signer: Any = signer_account
@@ -137,30 +157,56 @@ def _store_issue_hash_onchain(issue_id: str, data_hash: str) -> str:
     else:
         func = contract.functions.storeHash(contract_issue_id, data_hash)
 
-    tx = func.build_transaction({
-        "from": signer.address,
-        "nonce": nonce,
-        "chainId": CHAIN_ID,
-        "gasPrice": w3.eth.gas_price,
-    })
+    try:
+        latest_block = w3.eth.get_block('latest')
+        base_fee = latest_block.get('baseFeePerGas', 0)
+        priority_fee = w3.eth.max_priority_fee
+        if priority_fee < 1000000000:
+            priority_fee = 1500000000
+        max_fee = int(base_fee * 2) + priority_fee
+        
+        tx_params = {
+            "from": signer.address,
+            "nonce": nonce,
+            "chainId": CHAIN_ID,
+            "maxFeePerGas": max_fee,
+            "maxPriorityFeePerGas": priority_fee,
+        }
+    except Exception:
+        tx_params = {
+            "from": signer.address,
+            "nonce": nonce,
+            "chainId": CHAIN_ID,
+            "gasPrice": w3.eth.gas_price,
+        }
+
+    tx = func.build_transaction(tx_params)
     tx["gas"] = int(w3.eth.estimate_gas(tx) * 1.2)
 
     signed_txn = signer.sign_transaction(tx)
     tx_hash = w3.eth.send_raw_transaction(signed_txn.raw_transaction)
     
-    try:
-        from web3.exceptions import TimeExhausted, TransactionNotFound, Web3Exception
-        receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=180)
-    except TimeExhausted:
-        raise RuntimeError("Transaction receipt wait timed out (TimeExhausted)")
-    except TransactionNotFound:
-        raise RuntimeError("Transaction not found on chain (TransactionNotFound)")
-    except Web3Exception as wexc:
-        raise RuntimeError(f"Web3 protocol exception: {wexc}")
+    if wait_for_receipt:
+        try:
+            from web3.exceptions import TimeExhausted, TransactionNotFound, Web3Exception
+            receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=180)
+        except TimeExhausted:
+            raise RuntimeError("Transaction receipt wait timed out (TimeExhausted)")
+        except TransactionNotFound:
+            raise RuntimeError("Transaction not found on chain (TransactionNotFound)")
+        except Web3Exception as wexc:
+            raise RuntimeError(f"Web3 protocol exception: {wexc}")
+            
+        if receipt.status != 1:
+            raise RuntimeError("On-chain hash transaction failed (receipt status 0)")
+    else:
+        _wait_and_verify_receipt(
+            tx_hash_bytes=tx_hash,
+            function_name="store_issue_hash",
+            args={"issue_id": issue_id, "data_hash": data_hash}
+        )
         
-    if receipt.status != 1:
-        raise RuntimeError("On-chain hash transaction failed (receipt status 0)")
-    return receipt.transactionHash.hex()
+    return tx_hash.hex()
 
 def store_issue_hash(issue_id: str, data_hash: str) -> str:
     """Store the hash of an issue on chain. Falls back to mock hash if blockchain is inactive."""
@@ -168,7 +214,7 @@ def store_issue_hash(issue_id: str, data_hash: str) -> str:
         return "mock_tx_" + hashlib.sha256((issue_id + data_hash).encode()).hexdigest()
 
     try:
-        return _store_issue_hash_onchain(issue_id, data_hash)
+        return _store_issue_hash_onchain(issue_id, data_hash, wait_for_receipt=False)
     except Exception as e:
         _queue_failed_transaction(
             function_name="store_issue_hash",
@@ -193,7 +239,7 @@ def get_issue_hash(issue_id: str) -> Optional[str]:
     except Exception:
         return None
 
-def _store_completion_hash_onchain(issue_id: str, completion_hash: str) -> str:
+def _store_completion_hash_onchain(issue_id: str, completion_hash: str, wait_for_receipt: bool = False) -> str:
     w3: Any = web3_client
     contract: Any = contract_instance
     signer: Any = signer_account
@@ -204,30 +250,56 @@ def _store_completion_hash_onchain(issue_id: str, completion_hash: str) -> str:
     if not hasattr(contract.functions, "storeCompletionHash"):
         return "mock_completion_tx_no_contract_support"
 
-    tx = contract.functions.storeCompletionHash(contract_issue_id, completion_hash).build_transaction({
-        "from": signer.address,
-        "nonce": nonce,
-        "chainId": CHAIN_ID,
-        "gasPrice": w3.eth.gas_price,
-    })
+    try:
+        latest_block = w3.eth.get_block('latest')
+        base_fee = latest_block.get('baseFeePerGas', 0)
+        priority_fee = w3.eth.max_priority_fee
+        if priority_fee < 1000000000:
+            priority_fee = 1500000000
+        max_fee = int(base_fee * 2) + priority_fee
+        
+        tx_params = {
+            "from": signer.address,
+            "nonce": nonce,
+            "chainId": CHAIN_ID,
+            "maxFeePerGas": max_fee,
+            "maxPriorityFeePerGas": priority_fee,
+        }
+    except Exception:
+        tx_params = {
+            "from": signer.address,
+            "nonce": nonce,
+            "chainId": CHAIN_ID,
+            "gasPrice": w3.eth.gas_price,
+        }
+
+    tx = contract.functions.storeCompletionHash(contract_issue_id, completion_hash).build_transaction(tx_params)
     tx["gas"] = int(w3.eth.estimate_gas(tx) * 1.2)
 
     signed_txn = signer.sign_transaction(tx)
     tx_hash = w3.eth.send_raw_transaction(signed_txn.raw_transaction)
     
-    try:
-        from web3.exceptions import TimeExhausted, TransactionNotFound, Web3Exception
-        receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=180)
-    except TimeExhausted:
-        raise RuntimeError("Transaction receipt wait timed out (TimeExhausted)")
-    except TransactionNotFound:
-        raise RuntimeError("Transaction not found on chain (TransactionNotFound)")
-    except Web3Exception as wexc:
-        raise RuntimeError(f"Web3 protocol exception: {wexc}")
+    if wait_for_receipt:
+        try:
+            from web3.exceptions import TimeExhausted, TransactionNotFound, Web3Exception
+            receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=180)
+        except TimeExhausted:
+            raise RuntimeError("Transaction receipt wait timed out (TimeExhausted)")
+        except TransactionNotFound:
+            raise RuntimeError("Transaction not found on chain (TransactionNotFound)")
+        except Web3Exception as wexc:
+            raise RuntimeError(f"Web3 protocol exception: {wexc}")
+            
+        if receipt.status != 1:
+            raise RuntimeError("On-chain completion hash transaction failed (receipt status 0)")
+    else:
+        _wait_and_verify_receipt(
+            tx_hash_bytes=tx_hash,
+            function_name="store_completion_hash",
+            args={"issue_id": issue_id, "completion_hash": completion_hash}
+        )
         
-    if receipt.status != 1:
-        raise RuntimeError("On-chain completion hash transaction failed (receipt status 0)")
-    return receipt.transactionHash.hex()
+    return tx_hash.hex()
 
 def store_completion_hash(issue_id: str, completion_hash: str) -> str:
     """Store the resolution hash on chain."""
@@ -235,7 +307,7 @@ def store_completion_hash(issue_id: str, completion_hash: str) -> str:
         return "mock_completion_tx_" + hashlib.sha256((issue_id + completion_hash).encode()).hexdigest()
 
     try:
-        return _store_completion_hash_onchain(issue_id, completion_hash)
+        return _store_completion_hash_onchain(issue_id, completion_hash, wait_for_receipt=False)
     except Exception as e:
         _queue_failed_transaction(
             function_name="store_completion_hash",
@@ -259,7 +331,7 @@ def get_completion_hash(issue_id: str) -> Optional[str]:
         pass
     return None
 
-def _store_personnel_hash_onchain(user_id: str, data_hash: str) -> str:
+def _store_personnel_hash_onchain(user_id: str, data_hash: str, wait_for_receipt: bool = False) -> str:
     w3: Any = web3_client
     contract: Any = contract_instance
     signer: Any = signer_account
@@ -270,30 +342,56 @@ def _store_personnel_hash_onchain(user_id: str, data_hash: str) -> str:
     if not hasattr(contract.functions, "storePersonnelHash"):
         return "mock_personnel_tx_no_contract_support"
 
-    tx = contract.functions.storePersonnelHash(contract_user_id, data_hash).build_transaction({
-        "from": signer.address,
-        "nonce": nonce,
-        "chainId": CHAIN_ID,
-        "gasPrice": w3.eth.gas_price,
-    })
+    try:
+        latest_block = w3.eth.get_block('latest')
+        base_fee = latest_block.get('baseFeePerGas', 0)
+        priority_fee = w3.eth.max_priority_fee
+        if priority_fee < 1000000000:
+            priority_fee = 1500000000
+        max_fee = int(base_fee * 2) + priority_fee
+        
+        tx_params = {
+            "from": signer.address,
+            "nonce": nonce,
+            "chainId": CHAIN_ID,
+            "maxFeePerGas": max_fee,
+            "maxPriorityFeePerGas": priority_fee,
+        }
+    except Exception:
+        tx_params = {
+            "from": signer.address,
+            "nonce": nonce,
+            "chainId": CHAIN_ID,
+            "gasPrice": w3.eth.gas_price,
+        }
+
+    tx = contract.functions.storePersonnelHash(contract_user_id, data_hash).build_transaction(tx_params)
     tx["gas"] = int(w3.eth.estimate_gas(tx) * 1.2)
 
     signed_txn = signer.sign_transaction(tx)
     tx_hash = w3.eth.send_raw_transaction(signed_txn.raw_transaction)
 
-    try:
-        from web3.exceptions import TimeExhausted, TransactionNotFound, Web3Exception
-        receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=180)
-    except TimeExhausted:
-        raise RuntimeError("Transaction receipt wait timed out (TimeExhausted)")
-    except TransactionNotFound:
-        raise RuntimeError("Transaction not found on chain (TransactionNotFound)")
-    except Web3Exception as wexc:
-        raise RuntimeError(f"Web3 protocol exception: {wexc}")
+    if wait_for_receipt:
+        try:
+            from web3.exceptions import TimeExhausted, TransactionNotFound, Web3Exception
+            receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=180)
+        except TimeExhausted:
+            raise RuntimeError("Transaction receipt wait timed out (TimeExhausted)")
+        except TransactionNotFound:
+            raise RuntimeError("Transaction not found on chain (TransactionNotFound)")
+        except Web3Exception as wexc:
+            raise RuntimeError(f"Web3 protocol exception: {wexc}")
+            
+        if receipt.status != 1:
+            raise RuntimeError("On-chain hash transaction failed (receipt status 0)")
+    else:
+        _wait_and_verify_receipt(
+            tx_hash_bytes=tx_hash,
+            function_name="store_personnel_hash",
+            args={"user_id": user_id, "data_hash": data_hash}
+        )
         
-    if receipt.status != 1:
-        raise RuntimeError("On-chain hash transaction failed (receipt status 0)")
-    return receipt.transactionHash.hex()
+    return receipt.transactionHash.hex() if wait_for_receipt else tx_hash.hex()
 
 def store_personnel_hash(user_id: str, data_hash: str) -> str:
     """Store the hash of personnel data on chain. Falls back to mock hash if blockchain is inactive."""
@@ -301,7 +399,7 @@ def store_personnel_hash(user_id: str, data_hash: str) -> str:
         return "mock_tx_" + hashlib.sha256((user_id + data_hash).encode()).hexdigest()
 
     try:
-        return _store_personnel_hash_onchain(user_id, data_hash)
+        return _store_personnel_hash_onchain(user_id, data_hash, wait_for_receipt=False)
     except Exception as e:
         _queue_failed_transaction(
             function_name="store_personnel_hash",
@@ -363,17 +461,17 @@ def retry_failed_transactions() -> tuple[int, int]:
                 issue_id = args.get("issue_id")
                 data_hash = args.get("data_hash")
                 if issue_id and data_hash:
-                    _store_issue_hash_onchain(issue_id, data_hash)
+                    _store_issue_hash_onchain(issue_id, data_hash, wait_for_receipt=True)
             elif func_name == "store_completion_hash":
                 issue_id = args.get("issue_id")
                 completion_hash = args.get("completion_hash")
                 if issue_id and completion_hash:
-                    _store_completion_hash_onchain(issue_id, completion_hash)
+                    _store_completion_hash_onchain(issue_id, completion_hash, wait_for_receipt=True)
             elif func_name == "store_personnel_hash":
                 user_id = args.get("user_id")
                 data_hash = args.get("data_hash")
                 if user_id and data_hash:
-                    _store_personnel_hash_onchain(user_id, data_hash)
+                    _store_personnel_hash_onchain(user_id, data_hash, wait_for_receipt=True)
             else:
                 raise ValueError(f"Unknown function name in retry: {func_name}")
                 
